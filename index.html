@@ -142,8 +142,8 @@
      .stat-box.highlight { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); }
      .stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
      .stat-value { font-size: 1.6rem; font-weight: 700; margin-top: 0.5rem; color: #fff; }
-     .profit { color: var(--success-color) !important; }
-     .loss { color: var(--danger-color) !important; }
+     .profit { color: #ef4444 !important; }
+     .loss { color: #3b82f6 !important; }
      
      /* Table */
      .table-container { overflow-x: auto; margin-bottom: 1rem; }
@@ -1068,6 +1068,12 @@
       }
       setStorageData(data);
       alert(field === 'plan' ? '계획이 저장되었습니다.' : '복기가 저장되었습니다.');
+    }
+
+    function editDailyLog(dateStr) {
+      document.getElementById('dailyDate').value = dateStr;
+      loadDailyData();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function filterTotalTrades() {
@@ -2230,6 +2236,11 @@
             const planText = dailyLog && dailyLog.plan ? dailyLog.plan : '기록 없음';
             const summaryText = dailyLog && dailyLog.summary ? dailyLog.summary : '기록 없음';
             
+            let dailyActionButtons = `<button class="edit-btn" onclick="editDailyLog('${d}')" title="수정" style="background:none; border:none; cursor:pointer; font-size:0.9rem; font-weight:bold; color:var(--text-secondary);">✏️ 오늘의 기록 수정</button>`;
+            if (dailyLog) {
+              dailyActionButtons += `<button class="delete-btn" onclick="deleteItem('${dailyLog.id}', 'daily')" title="삭제" style="background:none; border:none; cursor:pointer; font-size:0.9rem; font-weight:bold; color:var(--danger-color); margin-left: 1rem;">🗑️ 오늘의 기록 삭제</button>`;
+            }
+
             html += `
               <details style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; margin-bottom: 0.5rem;" class="history-group">
                 <summary style="padding: 1rem; cursor: pointer; font-weight: bold; font-size: 1.1rem; list-style: none; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
@@ -2237,7 +2248,7 @@
                   <span style="font-size:0.9rem; color:var(--text-secondary); font-weight:normal;">매매 ${dayTrades.length}건</span>
                 </summary>
                 <div style="padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
-                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div style="background: var(--input-bg); padding: 1rem; border-radius: 6px;">
                       <h4 style="color:#a5b4fc; margin-top:0; margin-bottom:0.5rem; font-size:0.95rem;">🌅 장 시작 전 계획</h4>
                       <div style="font-size:0.9rem; color:var(--text-primary); white-space:pre-wrap;">${planText}</div>
@@ -2246,6 +2257,9 @@
                       <h4 style="color:#a5b4fc; margin-top:0; margin-bottom:0.5rem; font-size:0.95rem;">🌃 장 마감 후 복기</h4>
                       <div style="font-size:0.9rem; color:var(--text-primary); white-space:pre-wrap;">${summaryText}</div>
                     </div>
+                  </div>
+                  <div style="display:flex; justify-content:flex-end; margin-bottom: 1.5rem;">
+                    ${dailyActionButtons}
                   </div>
                   <div style="overflow-x:auto;">
                     <table class="notion-table" style="width:100%; border-collapse:collapse; text-align:left;">
