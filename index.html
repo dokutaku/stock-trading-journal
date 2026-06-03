@@ -336,6 +336,25 @@
         </div>
       </div>
 
+      <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-box">
+          <div class="stat-label">미장 누적 수익</div>
+          <div class="stat-value" id="assetUSProfit">0 원</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">국장 누적 수익</div>
+          <div class="stat-value" id="assetKRProfit">0 원</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">코인 누적 수익</div>
+          <div class="stat-value" id="assetCoinProfit">0 원</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">기타 누적 수익</div>
+          <div class="stat-value" id="assetEtcProfit">0 원</div>
+        </div>
+      </div>
+
       <!-- Middle Section: Today's Trades (Notion style) -->
       <div class="glass-panel" style="margin-bottom: 1.5rem; padding: 0;">
         <div style="display:flex; justify-content:space-between; align-items:center; padding: 1.5rem 1.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -760,10 +779,19 @@
         </div>
 
         <div id="tradeSectionBefore">
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
             <div class="form-group">
               <label>날짜</label>
               <input type="date" id="tradeDate">
+            </div>
+            <div class="form-group">
+              <label>자산 구분</label>
+              <select id="tradeAsset" style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary);">
+                <option value="미장">미장</option>
+                <option value="국장">국장</option>
+                <option value="코인">코인</option>
+                <option value="기타">기타</option>
+              </select>
             </div>
             <div class="form-group">
               <label>종목명</label>
@@ -975,6 +1003,7 @@
         if (trade) {
           document.getElementById('tradeId').value = trade.id;
           document.getElementById('tradeDate').value = trade.date;
+          document.getElementById('tradeAsset').value = trade.asset || '미장';
           document.getElementById('stockName').value = trade.stockName;
           document.getElementById('tradePosition').value = trade.position || 'Long';
           document.getElementById('tradeResult').value = trade.result || '';
@@ -1132,6 +1161,7 @@
 
       const tradeData = {
         date: document.getElementById('tradeDate').value,
+        asset: document.getElementById('tradeAsset').value,
         stockName: document.getElementById('stockName').value,
         position: position,
         result: resultOpt,
@@ -2115,6 +2145,31 @@
       else if (todayTotalProfit < 0) profitStatEl.className = 'stat-value loss';
       else profitStatEl.className = 'stat-value';
 
+      let usProfit = 0, krProfit = 0, coinProfit = 0, etcProfit = 0;
+      data.trades.forEach(t => {
+        if (t.profitAmount) {
+          const p = t.profitAmount;
+          if (t.asset === '국장') krProfit += p;
+          else if (t.asset === '코인') coinProfit += p;
+          else if (t.asset === '기타') etcProfit += p;
+          else usProfit += p; // Default to US if not specified
+        }
+      });
+      
+      const updateAssetStat = (id, val) => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.innerText = (val > 0 ? '+' : '') + formatCurrency(val);
+        if(val > 0) el.className = 'stat-value profit';
+        else if(val < 0) el.className = 'stat-value loss';
+        else el.className = 'stat-value';
+      };
+      
+      updateAssetStat('assetUSProfit', usProfit);
+      updateAssetStat('assetKRProfit', krProfit);
+      updateAssetStat('assetCoinProfit', coinProfit);
+      updateAssetStat('assetEtcProfit', etcProfit);
+
       // Populate Notion Tables
       const renderNotionRow = (t, includeDate = true, includeStatus = false, targetDateStr = '') => {
         let isWin = false, isLoss = false, isTie = false;
@@ -2192,8 +2247,10 @@
           holdings.forEach(t => {
             const posBadge = t.position === 'Short' ? 'short' : (t.position === 'Long' ? 'long' : 'ticker');
             const posText = t.position || '-';
-            const price = t.entryPrice ? formatCurrency(parseFloat(t.entryPrice)) : '-';
-            const qty = t.quantity ? formatCurrency(parseFloat(t.quantity)) : '-';
+            const priceVal = t.entryPrice ? parseFloat(t.entryPrice.replace(/,/g, '')) : null;
+            const price = priceVal !== null && !isNaN(priceVal) ? formatCurrency(priceVal) : '-';
+            const qtyVal = t.quantity ? parseFloat(t.quantity.replace(/,/g, '')) : null;
+            const qty = qtyVal !== null && !isNaN(qtyVal) ? qtyVal.toLocaleString() + ' 주' : '-';
             
             notionHoldingsBody.innerHTML += `
               <tr style="cursor:pointer;" onclick="openTradeModal('${t.id}')">
