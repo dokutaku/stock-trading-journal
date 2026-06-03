@@ -851,6 +851,7 @@
               <input type="text" id="quantity" placeholder="주" oninput="this.value = formatNumberInput(this.value); calculateStopLoss();">
             </div>
           </div>
+          <div id="totalBuyAmountDisplay" style="margin-top: 0.5rem; font-size: 0.85rem; color: #a5b4fc; text-align:center; min-height: 1.2rem;"></div>
         </div>
 
         <div id="tradeSectionAfter" style="display:none;">
@@ -1007,6 +1008,7 @@
       document.getElementById('tradeId').value = '';
       document.getElementById('tradeSaveBtn').innerText = '저장';
       document.getElementById('stopLossDisplay').innerHTML = '';
+      document.getElementById('totalBuyAmountDisplay').innerHTML = '';
       switchTradeFormTab('before');
       
       if (id) {
@@ -1251,6 +1253,17 @@
         }
         
         display.innerHTML = msg;
+      }
+      
+      const qtyStr = document.getElementById('quantity').value.replace(/,/g, '');
+      const qty = parseFloat(qtyStr);
+      const buyAmtDisplay = document.getElementById('totalBuyAmountDisplay');
+      if (buyAmtDisplay) {
+        if (!isNaN(entryPrice) && !isNaN(qty) && entryPrice > 0 && qty > 0) {
+          buyAmtDisplay.innerHTML = `총 매수 금액: <strong style="color: #fff;">${formatCurrency(entryPrice * qty)}</strong>`;
+        } else {
+          buyAmtDisplay.innerHTML = '';
+        }
       }
     }
 
