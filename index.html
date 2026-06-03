@@ -309,12 +309,12 @@
             <div>
               <label style="color:#a5b4fc; font-weight:bold; margin-bottom:0.5rem; display:block;">🌅 장 시작 전 계획</label>
               <textarea id="dailyPlan" rows="3" placeholder="ex) 오늘은 매수하지 않는다, 어제 산 종목의 흐름을 지켜본다" style="width:100%; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary); padding:0.8rem; margin-bottom:0.5rem;"></textarea>
-              <button class="btn" style="padding: 0.5rem; width: 100%;" onclick="saveDailyPlan()">계획 저장</button>
+              <button id="btnDailyPlan" class="btn" style="padding: 0.5rem; width: 100%;" onclick="saveDailyPlan()">계획 저장</button>
             </div>
             <div>
               <label style="color:#a5b4fc; font-weight:bold; margin-bottom:0.5rem; display:block;">🌃 장 마감 후 복기</label>
               <textarea id="dailySummary" rows="3" placeholder="ex) 잘 참았다, 뇌동매매로 감정이 흔들렸다 등 하루를 기록하는 습관" style="width:100%; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary); padding:0.8rem; margin-bottom:0.5rem;"></textarea>
-              <button class="btn" style="padding: 0.5rem; width: 100%;" onclick="saveDailySummary()">복기 저장</button>
+              <button id="btnDailySummary" class="btn" style="padding: 0.5rem; width: 100%;" onclick="saveDailySummary()">복기 저장</button>
             </div>
           </div>
         </div>
@@ -762,16 +762,15 @@
           <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
             <div class="form-group">
               <label>날짜</label>
-              <input type="date" id="tradeDate" required>
+              <input type="date" id="tradeDate">
             </div>
             <div class="form-group">
               <label>종목명</label>
-              <input type="text" id="stockName" placeholder="삼성전자, TSLA 등" required>
+              <input type="text" id="stockName">
             </div>
             <div class="form-group">
               <label>포지션 (선택)</label>
               <select id="tradePosition" style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary);">
-                <option value="">선택안함</option>
                 <option value="Long">Long</option>
                 <option value="Short">Short</option>
               </select>
@@ -794,20 +793,21 @@
             <div class="form-group">
               <label>최대 허용 손실 (%)</label>
               <div style="display:flex; align-items:center; gap:0.5rem;">
-                <input type="number" step="0.1" id="maxLoss" placeholder="ex) -3" style="flex-grow:1;">
+                <input type="number" step="0.1" id="maxLoss" style="flex-grow:1;" oninput="calculateStopLoss()">
                 <span style="color:var(--text-secondary); font-weight:bold;">%</span>
               </div>
+              <div id="stopLossDisplay" style="margin-top: 0.5rem; font-size: 0.85rem; color: #f87171; min-height: 1.2rem;"></div>
             </div>
           </div>
           <div class="section-title">💰 (3) 매수 정보</div>
           <div class="grid-2">
             <div class="form-group">
               <label>진입가</label>
-              <input type="text" id="entryPrice" oninput="this.value = formatNumberInput(this.value)" required>
+              <input type="text" id="entryPrice" oninput="this.value = formatNumberInput(this.value); calculateStopLoss();">
             </div>
             <div class="form-group">
               <label>수량</label>
-              <input type="text" id="quantity" placeholder="주" oninput="this.value = formatNumberInput(this.value)" required>
+              <input type="text" id="quantity" placeholder="주" oninput="this.value = formatNumberInput(this.value); calculateStopLoss();">
             </div>
           </div>
         </div>
@@ -863,14 +863,12 @@
     let currentFilter = 'all';
 
     const DEFAULT_SITES = [
-      // 거장 포트폴리오
       { category: "거장 포트폴리오", title: "Dataroma", url: "https://www.dataroma.com", desc: "미국 월스트릿 거장들의 포폴", market: ["US"] },
       { category: "거장 포트폴리오", title: "hedgefollow", url: "https://hedgefollow.com", desc: "유명 헤지펀드와 투자 대가의 포폴 추적", market: ["US"] },
       { category: "거장 포트폴리오", title: "WhaleWisdom", url: "https://whalewisdom.com", desc: "미국 거장들의 포트폴리오 추적", market: ["US"] },
       { category: "거장 포트폴리오", title: "Whale Insight Pro", url: "https://whale-insight.com/", desc: "국내 포폴(국민연금, 버핏 지분 변동 분석, 실시간이 아닌 공시기반)", market: ["KR", "US"] },
       { category: "거장 포트폴리오", title: "ETF.com", url: "https://www.etf.com", desc: "우량 ETF들의 보유 비중", market: ["US", "KR"] },
 
-      // 기업 분석
       { category: "기업 분석", title: "트레이딩 뷰", url: "https://kr.tradingview.com", desc: "차트 분석 도구", market: ["US", "KR"] },
       { category: "기업 분석", title: "스탁이지", url: "https://stockeasy.kr", desc: "국내 주식 맞춤 리서치", market: ["KR"] },
       { category: "기업 분석", title: "Finviz", url: "https://finviz.com", desc: "미국 주식 종목 스크리닝", market: ["US"] },
@@ -883,7 +881,6 @@
       { category: "기업 분석", title: "macrotrends", url: "https://www.macrotrends.net", desc: "10년치 이상의 매출과 이익, P/E추이 등을 차트로 볼 수 있다.", market: ["US"] },
       { category: "기업 분석", title: "tipranks", url: "https://www.tipranks.com", desc: "내부자 거래 추적", market: ["US"] },
 
-      // 경제흐름
       { category: "경제흐름", title: "Trading Economics", url: "https://tradingeconomics.com", desc: "전 세계 금리, 물가상승률, 원자재 가격 추이", market: ["US", "KR"] },
       { category: "경제흐름", title: "daily_byte", url: "https://www.mydailybyte.com/", desc: "비즈니스 및 경제 흐름", market: ["KR", "US"] },
       { category: "경제흐름", title: "어피티", url: "https://uppity.co.kr", desc: "경제 뉴스레터", market: ["KR", "US"] },
@@ -894,7 +891,6 @@
       { category: "경제흐름", title: "토스피드", url: "https://toss.im/tossfeed", desc: "트렌디한 이슈 풀이", market: ["KR", "US"] },
       { category: "경제흐름", title: "한국예탁결제원 세이브로", url: "https://seibro.or.kr", desc: "유동화증권과 국내 투자자들의 해외 주식 거래 규모", market: ["KR", "US"] },
 
-      // 경제 사이트
       { category: "경제 사이트", title: "KB Think", url: "https://kbthink.com/main.html", desc: "저축, 투자, 대출 등 카테고리별 정보", market: ["KR"] },
       { category: "경제 사이트", title: "뱅크샐러드 머니피드", url: "https://www.banksalad.com", desc: "절약꿀팁, 세금정보, 카드추천", market: ["KR"] },
       { category: "경제 사이트", title: "온통청년", url: "https://www.youthcenter.go.kr", desc: "청년 정책", market: ["KR"] },
@@ -920,15 +916,11 @@
       if (data) {
          try {
            const parsed = JSON.parse(data);
-           // migrate old data structure
            if(!parsed.news) parsed.news = [];
            if(!parsed.periodLogs) parsed.periodLogs = [];
            if(!parsed.sites) parsed.sites = [];
            
-             // Force restore and update all default seeded sites while keeping user's favorite preferences
              let migrated = false;
-             
-             // 1. Capture favorite states and custom edits of any existing seed sites
              const seedFavMap = {};
              const seedCustomMap = {};
              parsed.sites.forEach(s => {
@@ -938,11 +930,7 @@
                  if (s.customDesc) seedCustomMap[s.id + '_desc'] = s.customDesc;
                }
              });
-
-             // 2. Remove all existing seed sites from the array (we will reconstruct them)
              parsed.sites = parsed.sites.filter(s => !(s.id && typeof s.id === 'string' && s.id.startsWith('seed-')));
-
-             // 3. Insert fresh DEFAULT_SITES and apply the saved favorite state & custom edits
              DEFAULT_SITES.forEach(seed => {
                const freshSeed = { ...seed };
                if (seedFavMap[seed.id] !== undefined) {
@@ -952,19 +940,15 @@
                }
                if (seedCustomMap[seed.id + '_title']) freshSeed.customTitle = seedCustomMap[seed.id + '_title'];
                if (seedCustomMap[seed.id + '_desc']) freshSeed.customDesc = seedCustomMap[seed.id + '_desc'];
-               
                parsed.sites.push(freshSeed);
                migrated = true;
              });
-
-             // 4. Ensure any remaining custom user sites have isFavorite = true
              parsed.sites.forEach(s => {
                if (s.isFavorite === undefined) {
                  s.isFavorite = true;
                  migrated = true;
                }
              });
-             
              if (migrated) localStorage.setItem('tradingJournalData', JSON.stringify(parsed));
            return parsed;
          } catch(e) {
@@ -983,6 +967,7 @@
       document.getElementById('tradeDate').value = todayStr;
       document.getElementById('tradeId').value = '';
       document.getElementById('tradeDeleteBtn').style.display = 'none';
+      document.getElementById('stopLossDisplay').innerHTML = '';
       switchTradeFormTab('before');
       
       if (id) {
@@ -992,7 +977,7 @@
           document.getElementById('tradeId').value = trade.id;
           document.getElementById('tradeDate').value = trade.date;
           document.getElementById('stockName').value = trade.stockName;
-          document.getElementById('tradePosition').value = trade.position || '';
+          document.getElementById('tradePosition').value = trade.position || 'Long';
           document.getElementById('tradeResult').value = trade.result || '';
           document.getElementById('marketContext').value = trade.marketContext;
           document.getElementById('entryReason').value = trade.entryReason;
@@ -1052,6 +1037,11 @@
       const existing = data.dailyLogs.find(d => d.date === targetDate);
       document.getElementById('dailyPlan').value = existing ? (existing.plan || '') : '';
       document.getElementById('dailySummary').value = existing ? (existing.summary || '') : '';
+      
+      const btnPlan = document.getElementById('btnDailyPlan');
+      const btnSummary = document.getElementById('btnDailySummary');
+      if(btnPlan) btnPlan.innerText = (existing && existing.plan) ? '계획 수정' : '계획 저장';
+      if(btnSummary) btnSummary.innerText = (existing && existing.summary) ? '복기 수정' : '복기 저장';
     }
 
     function saveDailyPlan() { saveDailyPartial('plan'); }
