@@ -848,10 +848,8 @@
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1rem;">
-          <button type="button" id="tradeDeleteBtn" class="delete-btn" style="display:none; position:relative; right:auto; top:auto; width:auto; padding:0.8rem 1.5rem;" onclick="deleteCurrentTrade()">✕ 삭제</button>
-          <div style="flex-grow:1;"></div>
-          <button type="submit" class="btn" style="width:auto; padding: 0.8rem 2rem;">저장</button>
+        <div style="display:flex; justify-content:flex-end; align-items:center; margin-top: 1rem;">
+          <button type="submit" id="tradeSaveBtn" class="btn" style="width:auto; padding: 0.8rem 2rem;">저장</button>
         </div>
       </form>
     </div>
@@ -967,7 +965,7 @@
       document.getElementById('tradeForm').reset();
       document.getElementById('tradeDate').value = todayStr;
       document.getElementById('tradeId').value = '';
-      document.getElementById('tradeDeleteBtn').style.display = 'none';
+      document.getElementById('tradeSaveBtn').innerText = '저장';
       document.getElementById('stopLossDisplay').innerHTML = '';
       switchTradeFormTab('before');
       
@@ -991,7 +989,7 @@
           document.getElementById('holdingTime').value = trade.holdingTime || '';
           document.getElementById('reviewGoodBad').value = trade.reviewGoodBad;
           document.getElementById('improvements').value = trade.improvements;
-          document.getElementById('tradeDeleteBtn').style.display = 'block';
+          document.getElementById('tradeSaveBtn').innerText = '수정';
         }
       }
     }
@@ -1020,14 +1018,6 @@
         beforeBtn.style.borderBottom = '2px solid transparent';
         afterSec.style.display = 'block';
         beforeSec.style.display = 'none';
-      }
-    }
-    
-    function deleteCurrentTrade() {
-      const id = document.getElementById('tradeId').value;
-      if (id) {
-        deleteItem(id, 'trade');
-        closeTradeModal();
       }
     }
 
