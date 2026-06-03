@@ -1052,6 +1052,9 @@
       const targetDate = document.getElementById('dailyDate').value;
       if(!targetDate) return alert("날짜를 선택해주세요.");
       
+      const inputVal = field === 'plan' ? document.getElementById('dailyPlan').value.trim() : document.getElementById('dailySummary').value.trim();
+      if (!inputVal) return alert("내용이 없습니다. 내용을 입력해주세요.");
+      
       let existing = data.dailyLogs.find(d => d.date === targetDate);
       if (existing) {
         if(field === 'plan') existing.plan = document.getElementById('dailyPlan').value;
