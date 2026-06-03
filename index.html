@@ -600,6 +600,12 @@
   <!-- 년 탭 -->
   <div id="journal-year" class="journal-content">
     <div class="container-single">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+        <h2 class="section-title" style="margin: 0; border:none; padding:0;">📊 연간 누적수익</h2>
+        <select id="assetStatsYearSelect" onchange="renderAssetStats()" style="padding: 0.3rem 0.5rem; border-radius:4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color:white;">
+          <option value="all">전체 누적</option>
+        </select>
+      </div>
       <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr);">
         <div class="stat-box">
           <div class="stat-label">미장 누적 수익</div>
@@ -2094,19 +2100,27 @@
       if (yearSelect && yearSelect.options.length === 0) {
         const currentYear = new Date().getFullYear();
         const monthYearSelect = document.getElementById('month-target-year');
+        const assetStatsYearSelect = document.getElementById('assetStatsYearSelect');
         for (let i = currentYear - 10; i <= currentYear; i++) {
           const opt = document.createElement('option');
           opt.value = i;
-          opt.innerText = i;
+          opt.innerText = i + '년';
           if (i === currentYear) opt.selected = true;
           yearSelect.appendChild(opt);
           
           if (monthYearSelect) {
             const optMonth = document.createElement('option');
             optMonth.value = i;
-            optMonth.innerText = i;
+            optMonth.innerText = i + '년';
             if (i === currentYear) optMonth.selected = true;
             monthYearSelect.appendChild(optMonth);
+          }
+          
+          if (assetStatsYearSelect) {
+            const optAsset = document.createElement('option');
+            optAsset.value = i;
+            optAsset.innerText = i + '년';
+            assetStatsYearSelect.appendChild(optAsset);
           }
         }
       }
@@ -2186,6 +2200,40 @@
       container.innerHTML = html;
     }
 
+    function renderAssetStats(dataParam = null) {
+      const data = dataParam || getStorageData();
+      const yearSelect = document.getElementById('assetStatsYearSelect');
+      const targetYear = yearSelect ? yearSelect.value : 'all';
+
+      let usProfit = 0, krProfit = 0, coinProfit = 0, etcProfit = 0;
+      data.trades.forEach(t => {
+        const tradeYear = t.exitDate ? t.exitDate.substring(0, 4) : t.date.substring(0, 4);
+        if (targetYear !== 'all' && tradeYear !== targetYear) return;
+
+        if (t.profitAmount) {
+          const p = t.profitAmount;
+          if (t.asset === '국장') krProfit += p;
+          else if (t.asset === '코인') coinProfit += p;
+          else if (t.asset === '기타') etcProfit += p;
+          else usProfit += p;
+        }
+      });
+      
+      const updateAssetStat = (id, val) => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.innerText = (val > 0 ? '+' : '') + formatCurrency(val);
+        if(val > 0) el.className = 'stat-value profit';
+        else if(val < 0) el.className = 'stat-value loss';
+        else el.className = 'stat-value';
+      };
+      
+      updateAssetStat('assetUSProfit', usProfit);
+      updateAssetStat('assetKRProfit', krProfit);
+      updateAssetStat('assetCoinProfit', coinProfit);
+      updateAssetStat('assetEtcProfit', etcProfit);
+    }
+
     function renderTrades(dataParam) {
       const data = dataParam || getStorageData();
       const currentToday = todayStr;
@@ -2211,30 +2259,7 @@
       else if (todayTotalProfit < 0) profitStatEl.className = 'stat-value loss';
       else profitStatEl.className = 'stat-value';
 
-      let usProfit = 0, krProfit = 0, coinProfit = 0, etcProfit = 0;
-      data.trades.forEach(t => {
-        if (t.profitAmount) {
-          const p = t.profitAmount;
-          if (t.asset === '국장') krProfit += p;
-          else if (t.asset === '코인') coinProfit += p;
-          else if (t.asset === '기타') etcProfit += p;
-          else usProfit += p; // Default to US if not specified
-        }
-      });
-      
-      const updateAssetStat = (id, val) => {
-        const el = document.getElementById(id);
-        if(!el) return;
-        el.innerText = (val > 0 ? '+' : '') + formatCurrency(val);
-        if(val > 0) el.className = 'stat-value profit';
-        else if(val < 0) el.className = 'stat-value loss';
-        else el.className = 'stat-value';
-      };
-      
-      updateAssetStat('assetUSProfit', usProfit);
-      updateAssetStat('assetKRProfit', krProfit);
-      updateAssetStat('assetCoinProfit', coinProfit);
-      updateAssetStat('assetEtcProfit', etcProfit);
+      renderAssetStats(data);
 
       // Populate Notion Tables
       const renderNotionRow = (t, includeDate = true, includeStatus = false, targetDateStr = '') => {
