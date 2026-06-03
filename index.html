@@ -142,6 +142,8 @@
      .stat-box.highlight { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); }
      .stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
      .stat-value { font-size: 1.6rem; font-weight: 700; margin-top: 0.5rem; color: #fff; }
+     .stat-box.small { padding: 0.8rem; }
+     .stat-box.small .stat-value { font-size: 1.1rem; }
      .profit { color: #ef4444 !important; }
      .loss { color: #3b82f6 !important; }
      
@@ -606,20 +608,20 @@
           <option value="all">전체 누적</option>
         </select>
       </div>
-      <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr);">
-        <div class="stat-box">
+      <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;">
+        <div class="stat-box small">
           <div class="stat-label">미장 누적 수익</div>
           <div class="stat-value" id="assetUSProfit">0 원</div>
         </div>
-        <div class="stat-box">
+        <div class="stat-box small">
           <div class="stat-label">국장 누적 수익</div>
           <div class="stat-value" id="assetKRProfit">0 원</div>
         </div>
-        <div class="stat-box">
+        <div class="stat-box small">
           <div class="stat-label">코인 누적 수익</div>
           <div class="stat-value" id="assetCoinProfit">0 원</div>
         </div>
-        <div class="stat-box">
+        <div class="stat-box small">
           <div class="stat-label">기타 누적 수익</div>
           <div class="stat-value" id="assetEtcProfit">0 원</div>
         </div>
