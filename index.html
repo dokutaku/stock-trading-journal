@@ -2181,7 +2181,7 @@
         if (todaysTrades.length === 0) {
           notionTodayBody.innerHTML = '<tr><td colspan="8" class="empty-row" style="text-align:center;">오늘 기록된 매매가 없습니다.</td></tr>';
         } else {
-          todaysTrades.forEach(t => {
+          [...todaysTrades].reverse().forEach(t => {
             notionTodayBody.innerHTML += renderNotionRow(t, false, true, currentToday);
           });
         }
@@ -2236,7 +2236,7 @@
             const dailyLog = data.dailyLogs.find(log => log.date === d);
             
             let tradesHtml = '';
-            dayTrades.forEach(t => {
+            [...dayTrades].reverse().forEach(t => {
                tradesHtml += renderNotionRow(t, false, true, d);
             });
             
