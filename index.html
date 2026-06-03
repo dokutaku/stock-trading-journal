@@ -354,7 +354,7 @@
                 <th><span style="margin-right:5px; opacity:0.7;">💰</span> 수익금</th>
                 <th><span style="margin-right:5px; opacity:0.7;">📊</span> 상태</th>
                 <th><span style="margin-right:5px; opacity:0.7;">📝</span> 매매 복기</th>
-                <th><span style="margin-right:5px; opacity:0.7;">🗑️</span> 삭제</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="notionTodayBody">
@@ -2175,7 +2175,7 @@
             <td>${profitStr}</td>
             ${statusTd}
             <td><a href="javascript:void(0)" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;" onclick="event.stopPropagation(); openTradeModal('${t.id}')">➔ 클릭</a></td>
-            <td style="text-align:center;"><button onclick="event.stopPropagation(); deleteItem('${t.id}', 'trade');" style="background:none; border:none; cursor:pointer; font-size:1rem; color:var(--danger-color);" title="삭제">❌</button></td>
+            <td style="text-align:center;"><button onclick="event.stopPropagation(); deleteItem('${t.id}', 'trade');" style="background:none; border:none; cursor:pointer; font-size:0.85rem; color:var(--danger-color);" title="삭제">❌</button></td>
           </tr>
         `;
       };
@@ -2277,7 +2277,7 @@
                           <th><span style="margin-right:5px; opacity:0.7;">💰</span> 수익금</th>
                           <th><span style="margin-right:5px; opacity:0.7;">📊</span> 상태</th>
                           <th><span style="margin-right:5px; opacity:0.7;">📝</span> 매매 일지</th>
-                          <th><span style="margin-right:5px; opacity:0.7;">🗑️</span> 삭제</th>
+                          <th></th>
                         </tr>
                       </thead>
                       <tbody>
