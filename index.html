@@ -340,24 +340,6 @@
           <div class="stat-value" id="totalTradesStat">0</div>
         </div>
       </div>
-
-      <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr);">
-        <div class="stat-box">
-          <div class="stat-label">미장 누적 수익</div>
-          <div class="stat-value" id="assetUSProfit">0 원</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">국장 누적 수익</div>
-          <div class="stat-value" id="assetKRProfit">0 원</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">코인 누적 수익</div>
-          <div class="stat-value" id="assetCoinProfit">0 원</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">기타 누적 수익</div>
-          <div class="stat-value" id="assetEtcProfit">0 원</div>
-        </div>
       </div>
 
       <!-- Middle Section: Today's Trades (Notion style) -->
@@ -618,6 +600,24 @@
   <!-- 년 탭 -->
   <div id="journal-year" class="journal-content">
     <div class="container-single">
+      <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-box">
+          <div class="stat-label">미장 누적 수익</div>
+          <div class="stat-value" id="assetUSProfit">0 원</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">국장 누적 수익</div>
+          <div class="stat-value" id="assetKRProfit">0 원</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">코인 누적 수익</div>
+          <div class="stat-value" id="assetCoinProfit">0 원</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">기타 누적 수익</div>
+          <div class="stat-value" id="assetEtcProfit">0 원</div>
+        </div>
+      </div>
       <div class="glass-panel">
         <h2 class="section-title">📅 연간 점검 및 계획</h2>
         <form onsubmit="saveYearLog(event)">
