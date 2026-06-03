@@ -604,24 +604,24 @@
     <div class="container-single">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
         <h2 class="section-title" style="margin: 0; border:none; padding:0;">📊 연간 누적수익</h2>
-        <select id="assetStatsYearSelect" onchange="renderAssetStats()" style="padding: 0.3rem 0.5rem; border-radius:4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color:white;">
+        <select id="assetStatsYearSelect" onchange="renderAssetStats()" style="width: 110px; padding: 0.3rem 0.5rem; border-radius:4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color:white; font-size:0.9rem;">
           <option value="all">전체 누적</option>
         </select>
       </div>
-      <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;">
-        <div class="stat-box small">
+      <div class="stats-grid" id="assetStatsGrid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-box">
           <div class="stat-label">미장 누적 수익</div>
           <div class="stat-value" id="assetUSProfit">0 원</div>
         </div>
-        <div class="stat-box small">
+        <div class="stat-box">
           <div class="stat-label">국장 누적 수익</div>
           <div class="stat-value" id="assetKRProfit">0 원</div>
         </div>
-        <div class="stat-box small">
+        <div class="stat-box">
           <div class="stat-label">코인 누적 수익</div>
           <div class="stat-value" id="assetCoinProfit">0 원</div>
         </div>
-        <div class="stat-box small">
+        <div class="stat-box">
           <div class="stat-label">기타 누적 수익</div>
           <div class="stat-value" id="assetEtcProfit">0 원</div>
         </div>
