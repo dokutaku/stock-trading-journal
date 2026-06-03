@@ -1,0 +1,2783 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주식 매매 일지 | Open Design</title>
+  <script src="daily_briefing.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+     :root {
+        --bg-color: #0f1115;
+        --panel-bg: rgba(25, 28, 35, 0.7);
+        --panel-border: rgba(255, 255, 255, 0.08);
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --accent-color: #6366f1;
+        --accent-hover: #4f46e5;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --input-bg: rgba(15, 17, 21, 0.6);
+     }
+     * { box-sizing: border-box; margin: 0; padding: 0; }
+     body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-color);
+        color: var(--text-primary);
+        min-height: 100vh;
+        background-image: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+                          radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05), transparent 25%);
+        background-attachment: fixed;
+     }
+     h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; }
+     
+     /* Main Navigation */
+     .top-nav {
+       background: rgba(15, 17, 21, 0.8);
+       backdrop-filter: blur(10px);
+       border-bottom: 1px solid var(--panel-border);
+       position: sticky;
+       top: 0;
+       z-index: 50;
+       padding: 0 2rem;
+     }
+     .nav-container {
+       max-width: 1400px;
+       margin: 0 auto;
+       display: flex;
+       align-items: center;
+       height: 70px;
+       gap: 1.5rem;
+       overflow-x: auto;
+     }
+     .nav-container::-webkit-scrollbar { display: none; }
+     .logo {
+       font-size: 1.4rem;
+       font-weight: 700;
+       color: #fff;
+       margin-right: 2rem;
+       flex-shrink: 0;
+     }
+     .nav-btn {
+       background: none;
+       border: none;
+       color: var(--text-secondary);
+       font-size: 1rem;
+       font-weight: 500;
+       cursor: pointer;
+       padding: 0.5rem 1rem;
+       border-radius: 8px;
+       transition: all 0.2s;
+       flex-shrink: 0;
+     }
+     .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+     .nav-btn.active { color: #fff; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); }
+
+     /* Main Content Areas */
+     .main-content { display: none; padding: 2rem; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.4s ease; }
+     .main-content.active { display: block; }
+
+     .container {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+     }
+     .container-single { display: grid; grid-template-columns: 1fr; gap: 2rem; max-width: 1000px; margin: 0 auto; }
+     @media (max-width: 1024px) { .container { grid-template-columns: 1fr; } }
+     
+     .glass-panel {
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        margin-bottom: 1.5rem;
+     }
+     
+     .form-group { margin-bottom: 1.2rem; }
+     .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+     
+     input, textarea, select {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+     }
+     input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+     textarea { resize: vertical; min-height: 80px; }
+     
+     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+     
+     .btn {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        font-size: 1rem;
+     }
+     .btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+     
+     .section-title { font-size: 1.1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.5rem; margin-bottom: 1.2rem; margin-top: 2rem; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+     .section-title:first-child { margin-top: 0; }
+     
+     /* Stats Grid */
+     .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+     .stat-box { background: var(--input-bg); border-radius: 12px; padding: 1.2rem; text-align: center; border: 1px solid var(--panel-border); }
+     .stat-box.highlight { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); }
+     .stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+     .stat-value { font-size: 1.6rem; font-weight: 700; margin-top: 0.5rem; color: #fff; }
+     .profit { color: var(--success-color) !important; }
+     .loss { color: var(--danger-color) !important; }
+     
+     /* Table */
+     .table-container { overflow-x: auto; margin-bottom: 1rem; }
+     .today-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+     .today-table th, .today-table td { padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--panel-border); font-size: 0.9rem; }
+     .today-table th { color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; }
+     .today-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+     .empty-row { text-align: center; color: var(--text-secondary); padding: 2rem !important; }
+
+     /* Calculator */
+     .calc-result { margin-top: 1.5rem; padding: 1.2rem; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3); text-align: center; }
+     .calc-result .stat-value { color: #a5b4fc; font-size: 1.8rem; }
+
+     /* Lists */
+     .history-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; max-height: 600px; overflow-y: auto; padding-right: 0.5rem; }
+     .history-list::-webkit-scrollbar { width: 6px; }
+     .history-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+     .history-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+     
+     .history-card { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 1.2rem; transition: all 0.2s; }
+     .history-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+     .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.8rem; }
+     .date-badge { font-size: 0.8rem; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 500; }
+     
+     /* Inner Tabs */
+     .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: var(--input-bg); padding: 0.3rem; border-radius: 10px; border: 1px solid var(--panel-border); }
+     .tab { flex: 1; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 0.6rem 1rem; border-radius: 6px; transition: all 0.2s; font-weight: 500; font-size: 0.95rem; }
+     .tab.active { background: var(--panel-bg); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid var(--panel-border); }
+     .tab:hover:not(.active) { color: var(--text-primary); }
+     .tab-content { display: none; }
+     .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+     
+     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+     
+     #toast { visibility: hidden; min-width: 250px; background-color: var(--success-color); color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; font-size: 0.95rem; font-weight: 500; transform: translateX(-50%); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+     #toast.show { visibility: visible; animation: fadeinToast 0.5s, fadeoutToast 0.5s 2.5s; }
+     @keyframes fadeinToast { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+     @keyframes fadeoutToast { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+     .delete-btn { background: transparent; border: none; color: var(--danger-color); cursor: pointer; opacity: 0.6; padding: 0.2rem; font-size: 1.1rem; }
+     .delete-btn:hover { opacity: 1; }
+     
+     .card-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; }
+     .card-body p { font-size: 0.9rem; margin-bottom: 0.4rem; line-height: 1.4; color: #cbd5e1; white-space: pre-wrap;}
+     .card-body strong { color: #fff; font-weight: 500; }
+     
+     .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+     .badge-buy { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+     .badge-sell { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+     /* Site Grid */
+     .site-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+     .site-card { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 1.5rem; transition: all 0.2s; text-decoration: none; color: inherit; display: block; position: relative; }
+     .site-card:hover { border-color: var(--accent-color); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15); }
+     .site-card h3 { color: #fff; margin-bottom: 0.5rem; font-size: 1.2rem; }
+     .site-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4; }
+     .site-delete { position: absolute; top: 1rem; right: 1rem; }
+     
+     .journal-content { display: none; }
+     .journal-content.active { display: block; animation: fadeIn 0.4s ease; }
+    /* Notion Table Styles */
+    .notion-table th { border-bottom: 2px solid rgba(255,255,255,0.1); font-size: 0.85rem; }
+    .notion-table td { padding: 0.8rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0; vertical-align: middle; font-size: 0.9rem; }
+    .notion-table td:first-child, .notion-table th:first-child { padding-left: 1.5rem; }
+    .notion-table td:last-child, .notion-table th:last-child { padding-right: 1.5rem; }
+    .notion-table tr:hover { background: rgba(255,255,255,0.02); }
+    .notion-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+    .notion-badge.long { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .notion-badge.short { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .notion-badge.ticker { background: rgba(255, 255, 255, 0.05); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); font-family: monospace; }
+    .notion-checkbox { width: 16px; height: 16px; display: inline-block; border: 2px solid var(--text-secondary); border-radius: 3px; vertical-align: middle; position:relative; }
+    .notion-checkbox.checked { background: var(--accent-color); border-color: var(--accent-color); }
+    .notion-checkbox.checked::after { content: '✓'; position:absolute; top:-2px; left:2px; color:white; font-size: 12px; font-weight:bold; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="nav-container">
+      <div class="logo">📈 Journal</div>
+      <button class="nav-btn active" onclick="switchMainTab('news')" id="nav-news">오늘 뉴스</button>
+      <button class="nav-btn" onclick="switchMainTab('journal')" id="nav-journal">매매일지</button>
+      <button class="nav-btn" onclick="switchMainTab('calculator')" id="nav-calculator">고정 손실 계산기</button>
+      <button class="nav-btn" onclick="switchMainTab('site')" id="nav-site">관련 사이트</button>
+    </div>
+  </nav>
+
+  <!-- 1. 오늘 뉴스 탭 -->
+  <div id="main-news" class="main-content active">
+    <div class="container">
+      <!-- Briefing Dashboard -->
+      <div class="glass-panel" style="margin-bottom: 0; padding-right: 0.5rem;">
+        <h2 class="section-title" style="margin-top: 0;">🌅 오늘의 AI 모닝 브리핑</h2>
+        <div id="dailyBriefingContent" style="max-height: 750px; overflow-y: auto; padding-right: 1rem;">
+          <p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">데이터를 불러오는 중입니다...</p>
+        </div>
+      </div>
+      
+      <!-- Manual Scraping Form -->
+      <div>
+        <div class="glass-panel" style="margin-bottom: 1.5rem;">
+          <h2 class="section-title" style="margin-top: 0;">📰 개별 뉴스 스크랩</h2>
+          <form onsubmit="saveNews(event)">
+            <div class="grid-2">
+              <div class="form-group">
+                <label>날짜</label>
+                <input type="date" id="newsDate" required>
+              </div>
+              <div class="form-group">
+                <label>뉴스 제목 / 핵심 이슈</label>
+                <input type="text" id="newsTitle" placeholder="ex) 연준 금리 동결 발표..." required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>관련 링크 (선택)</label>
+              <input type="url" id="newsLink" placeholder="https://...">
+            </div>
+            <div class="form-group">
+              <label>코멘트 (시장에 미칠 영향 등)</label>
+              <textarea id="newsComment" placeholder="내 생각이나 관련 종목..." required></textarea>
+            </div>
+            <button type="submit" class="btn">뉴스 저장하기</button>
+          </form>
+        </div>
+        <div class="glass-panel" style="margin-bottom: 0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+            <h2 class="section-title" style="margin: 0;">최근 스크랩한 뉴스</h2>
+            <button id="newsMoreBtn" onclick="openNewsModal()" style="display:none; background:none; border:none; color:var(--accent-color); font-size:0.85rem; cursor:pointer; font-weight:bold;">더보기</button>
+          </div>
+          <div id="newsList" class="history-list" style="max-height: 300px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 매매일지 탭 -->
+  <div id="main-journal" class="main-content">
+    <div id="journal-subnav-wrapper" style="position: sticky; top: 70px; z-index: 50; max-width: 1200px; margin: 0 auto 1.5rem auto; padding: 1rem 1rem 0 1rem; background: var(--bg-color); transition: all 0.3s ease;">
+      <div class="tabs" style="justify-content: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-radius: 12px; margin-bottom: 0;">
+        <button class="tab jtab active" onclick="switchJournalTab('trade')" id="jnav-trade" style="padding: 0.8rem 1.5rem; font-size: 1.05rem;">일 (Day)</button>
+        <button class="tab jtab" onclick="switchJournalTab('week')" id="jnav-week" style="padding: 0.8rem 1.5rem; font-size: 1.05rem;">주 (Week)</button>
+        <button class="tab jtab" onclick="switchJournalTab('month')" id="jnav-month" style="padding: 0.8rem 1.5rem; font-size: 1.05rem;">월 (Month)</button>
+        <button class="tab jtab" onclick="switchJournalTab('quarter')" id="jnav-quarter" style="padding: 0.8rem 1.5rem; font-size: 1.05rem;">분기 (Quarter)</button>
+        <button class="tab jtab" onclick="switchJournalTab('year')" id="jnav-year" style="padding: 0.8rem 1.5rem; font-size: 1.05rem;">년 (Year)</button>
+      </div>
+    </div>
+    
+  <!-- 일 탭 -->
+  <div id="journal-trade" class="journal-content active">
+    <div class="container-single">
+      
+      <!-- Top Section: Daily Plan & Review -->
+      <div class="glass-panel" style="margin-bottom: 1.5rem;">
+        <h2 class="section-title">📝 오늘의 기록 (장 시작 전 계획 & 마감 후 복기)</h2>
+        <div id="dailyFormContainer">
+          <div style="display:flex; justify-content:space-between; margin-bottom: 1rem; align-items: flex-end;">
+            <div class="form-group" style="width: 200px; margin-bottom:0;">
+              <input type="date" id="dailyDate" onchange="loadDailyData()" required>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+              <label style="color:#a5b4fc; font-weight:bold; margin-bottom:0.5rem; display:block;">🌅 장 시작 전 계획</label>
+              <textarea id="dailyPlan" rows="3" placeholder="ex) 오늘은 매수하지 않는다, 어제 산 종목의 흐름을 지켜본다" style="width:100%; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary); padding:0.8rem; margin-bottom:0.5rem;"></textarea>
+              <button class="btn" style="padding: 0.5rem; width: 100%;" onclick="saveDailyPlan()">계획 저장</button>
+            </div>
+            <div>
+              <label style="color:#a5b4fc; font-weight:bold; margin-bottom:0.5rem; display:block;">🌃 장 마감 후 복기</label>
+              <textarea id="dailySummary" rows="3" placeholder="ex) 잘 참았다, 뇌동매매로 감정이 흔들렸다 등 하루를 기록하는 습관" style="width:100%; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary); padding:0.8rem; margin-bottom:0.5rem;"></textarea>
+              <button class="btn" style="padding: 0.5rem; width: 100%;" onclick="saveDailySummary()">복기 저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-box highlight">
+          <div class="stat-label" style="color: #a5b4fc;">오늘 총 수익금</div>
+          <div class="stat-value" id="todayProfitStat">0 원</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">평균 승률</div>
+          <div class="stat-value" id="winRateStat">0%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">총 매매 횟수</div>
+          <div class="stat-value" id="totalTradesStat">0</div>
+        </div>
+      </div>
+
+      <!-- Middle Section: Today's Trades (Notion style) -->
+      <div class="glass-panel" style="margin-bottom: 1.5rem; padding: 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 1.5rem 1.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <h2 class="section-title" style="margin: 0; border:none; padding:0;">📋 오늘 매매 내역</h2>
+          <button onclick="openTradeModal()" style="background:var(--accent-color); color:#fff; border:none; padding:0.5rem 1rem; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.9rem; transition: background 0.2s;">+ 추가</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="notion-table" style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+                <th><span style="margin-right:5px; opacity:0.7;">🔤</span> 종목명</th>
+                <th><span style="margin-right:5px; opacity:0.7;">↕️</span> 포지션</th>
+                <th><span style="margin-right:5px; opacity:0.7;">✅</span> 승</th>
+                <th><span style="margin-right:5px; opacity:0.7;">➖</span> 무</th>
+                <th><span style="margin-right:5px; opacity:0.7;">❌</span> 패</th>
+                <th><span style="margin-right:5px; opacity:0.7;">💰</span> 수익금</th>
+                <th><span style="margin-right:5px; opacity:0.7;">📊</span> 상태</th>
+                <th><span style="margin-right:5px; opacity:0.7;">📝</span> 매매 복기</th>
+              </tr>
+            </thead>
+            <tbody id="notionTodayBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Holdings Section -->
+      <div class="glass-panel" style="margin-bottom: 1.5rem; padding: 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 1.5rem 1.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <h2 class="section-title" style="margin: 0; border:none; padding:0;">💼 내 보유 종목</h2>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="notion-table" style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+                <th><span style="margin-right:5px; opacity:0.7;">📅</span> 진입 날짜</th>
+                <th><span style="margin-right:5px; opacity:0.7;">🔤</span> 종목명</th>
+                <th><span style="margin-right:5px; opacity:0.7;">↕️</span> 포지션</th>
+                <th><span style="margin-right:5px; opacity:0.7;">💰</span> 진입가</th>
+                <th><span style="margin-right:5px; opacity:0.7;">📦</span> 수량</th>
+                <th><span style="margin-right:5px; opacity:0.7;">📝</span> 매도 입력</th>
+              </tr>
+            </thead>
+            <tbody id="notionHoldingsBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bottom Section: All Trades (Notion style) -->
+      <div class="glass-panel" style="margin-bottom: 0; padding: 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 1.5rem 1.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <h2 class="section-title" style="margin: 0; border:none; padding:0;">📚 총 매매 내역</h2>
+          <input type="text" id="totalTradeSearch" onkeyup="filterTotalTrades()" placeholder="🔍 연/월/일 검색" style="padding:0.5rem 1rem; border-radius:20px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary); width:150px;">
+        </div>
+        <div id="notionTotalContainer" style="padding: 1.5rem; display:flex; flex-direction:column; gap:1rem;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 주 탭 -->
+  <div id="journal-week" class="journal-content">
+    <div class="container-single">
+      <div class="glass-panel">
+        <h2 class="section-title">📅 주간 점검</h2>
+        <form onsubmit="savePeriodLog(event, 'week')">
+          <div class="form-group">
+            <label>작성 일자 (주차 표시용)</label>
+            <input type="date" class="period-date" required onchange="renderWeeklyFormCalendar(this.value)">
+          </div>
+          <div id="weeklyFormCalendarContainer"></div>
+          <div class="form-group">
+            <label>이번 주 성과에 대한 이유 분석</label>
+            <textarea class="period-reason" rows="4" placeholder="수익이 난 이유, 혹은 손실을 본 이유에 대한 구체적인 분석" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>잘한 점 / 아쉬운 점 정리</label>
+            <textarea class="period-feedback" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn">주간 점검 저장하기</button>
+        </form>
+      </div>
+      <div class="glass-panel">
+        <h2 class="section-title">지난 주간 기록</h2>
+        <div id="weekList" class="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 월 탭 -->
+  <div id="journal-month" class="journal-content">
+    <div class="container-single">
+      <div class="glass-panel">
+        <h2 class="section-title">📅 월간 분석</h2>
+        <form onsubmit="savePeriodLog(event, 'month')">
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="margin: 0;">작성 일자 (연도/월 선택)</label>
+              <button type="button" class="btn" style="width: auto; padding: 0.4rem 1rem; margin: 0; background-color: var(--accent-hover);" onclick="autoAnalyzeMonth(this)">월간 자동 분석</button>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <select id="month-target-year" required style="flex:1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--panel-border); background: var(--input-bg); color: var(--text-primary);"></select>
+              <select id="month-target-month" required style="flex:1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--panel-border); background: var(--input-bg); color: var(--text-primary);">
+                <option value="01">01월</option>
+                <option value="02">02월</option>
+                <option value="03">03월</option>
+                <option value="04">04월</option>
+                <option value="05">05월</option>
+                <option value="06">06월</option>
+                <option value="07">07월</option>
+                <option value="08">08월</option>
+                <option value="09">09월</option>
+                <option value="10">10월</option>
+                <option value="11">11월</option>
+                <option value="12">12월</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>시장 흐름 분석</label>
+            <textarea class="period-market" rows="4" required>- 금리, 유동성, 환율 변화 점검:
+- 외국인과 기관 자금 확인:
+- 코스피가 단순 반등인지 새로운 추세 시작인지 판단:</textarea>
+          </div>
+          <div class="form-group">
+            <label>섹터 흐름 분석</label>
+            <textarea class="period-sector" rows="3" required>- 강세였던 종목 및 조정 중인 종목:
+- 새롭게 강세로 변하는 종목 (성장주/가치주 흐름 등):</textarea>
+          </div>
+          <div class="form-group">
+            <label>자산 배분 및 포트폴리오 점검</label>
+            <textarea class="period-portfolio" rows="2" required>- ETF 비중 구성 유효성 점검 (주식 0%, 채권 0%, 현금 0%):</textarea>
+          </div>
+          <div class="form-group">
+            <label>월간 점검</label>
+            <textarea class="period-review" rows="4" required>- 한 달 동안 투자 원칙을 잘 지켰는가?:
+- 하락장에서 분할 매수를 잘 지켰는가?:
+- 단기 뉴스에 흔들려 감정적 매도한 건 아닌가?:
+- 싼 게 아닌 가치있는 종목을 샀는가?:</textarea>
+          </div>
+          <button type="submit" class="btn">저장하기</button>
+        </form>
+      </div>
+      <div class="glass-panel">
+        <h2 class="section-title">지난 월간 기록</h2>
+        <div id="monthList" class="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 분기 탭 -->
+  <div id="journal-quarter" class="journal-content">
+    <div class="container-single">
+      <div class="glass-panel">
+        <h2 class="section-title">📅 기업 실적 점검표</h2>
+        <form onsubmit="savePeriodLog(event, 'quarter')">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>연도 (Year)</label>
+              <input type="number" id="quarterYear" placeholder="2026" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>분기 (Quarter)</label>
+              <select id="quarterQ" required style="width:100%; padding: 0.8rem; border-radius:8px; border:1px solid var(--panel-border); background:rgba(255,255,255,0.05); color:#fff; font-size:1rem;">
+                <option value="1" style="color:#000;">1분기</option>
+                <option value="2" style="color:#000;">2분기</option>
+                <option value="3" style="color:#000;">3분기</option>
+                <option value="4" style="color:#000;">4분기</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="display: flex; gap: 10px; align-items: flex-end;">
+            <div style="flex-grow: 1;">
+              <label>종목명 (입력 후 자동 분석 클릭)</label>
+              <input type="text" id="quarterStock" placeholder="종목명 입력" required>
+            </div>
+            <button type="button" class="btn" style="width: auto; padding: 0.8rem 1.5rem; white-space: nowrap;" onclick="autoAnalyzeStock()">자동 분석</button>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <!-- 좌측: 분석 내용 -->
+            <div>
+              <div class="form-group">
+                <label>(1) 매출 증가 이유</label>
+                <textarea class="q-revenue" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>(2) 영업이익 점검 (손익계산서 확인)</label>
+                <textarea class="q-op-profit" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>(3) 잉여현금흐름(FCF)</label>
+                <textarea class="q-fcf" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>(4) 자기자본이익률(ROE)</label>
+                <textarea class="q-roe" rows="3" required></textarea>
+              </div>
+            </div>
+            
+            <!-- 우측: 증권사별 목표주가 표 -->
+            <div>
+              <div class="form-group">
+                <label style="margin-bottom: 0.5rem; display: block;">증권사별 목표주가</label>
+                <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); border-radius: 8px; padding: 1rem; height: calc(100% - 2rem); display: flex; flex-direction: column;">
+                  <div style="flex-grow: 1; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;" id="brokerageTable">
+                      <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+                          <th style="padding: 0.5rem; font-weight: normal; color: var(--text-secondary);">증권사</th>
+                          <th style="padding: 0.5rem; font-weight: normal; color: var(--text-secondary);">목표주가</th>
+                          <th style="padding: 0.5rem; width: 40px;"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="brokerageTbody">
+                        <!-- 동적 추가 -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; padding: 1rem; background:rgba(255,255,255,0.05); border-radius:8px;">
+            <div>
+              <label style="margin-bottom:0.5rem; display:block;">실적이 개선 되었나?</label>
+              <div style="display:flex; gap:1.5rem;">
+                <label style="font-weight:normal; cursor:pointer;"><input type="radio" name="q-improve" value="yes" required> Yes</label>
+                <label style="font-weight:normal; cursor:pointer;"><input type="radio" name="q-improve" value="no" required> No</label>
+              </div>
+            </div>
+            <div>
+              <label style="margin-bottom:0.5rem; display:block;">전망이 유지되는가?</label>
+              <div style="display:flex; gap:1.5rem;">
+                <label style="font-weight:normal; cursor:pointer;"><input type="radio" name="q-outlook" value="yes" required> Yes</label>
+                <label style="font-weight:normal; cursor:pointer;"><input type="radio" name="q-outlook" value="no" required> No</label>
+              </div>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn">저장하기</button>
+        </form>
+      </div>
+      <div class="glass-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 class="section-title" style="margin-bottom: 0;">분기별 기업 실적 점검 기록</h2>
+          <input type="text" id="quarterSearch" placeholder="연도, 분기, 종목명 검색..." onkeyup="renderPeriods(getStorageData())" style="padding: 0.4rem 0.8rem; border-radius: 4px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: 220px; font-size: 0.9rem;">
+        </div>
+        <div id="quarterList" class="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 년 탭 -->
+  <div id="journal-year" class="journal-content">
+    <div class="container-single">
+      <div class="glass-panel">
+        <h2 class="section-title">📅 연간 점검 및 계획</h2>
+        <form onsubmit="saveYearLog(event)">
+          <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+            <label style="margin:0; font-weight:bold;">대상 연도</label>
+            <select id="year-target-year" style="width: 100px; padding: 0.3rem 0.5rem; border-radius:4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color:white;" required>
+            </select>
+            <span>년</span>
+          </div>
+          <h3 style="margin-top:0.5rem; margin-bottom:1rem; color: #a5b4fc; font-size: 1.1rem;">올해 투자 점검</h3>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>올해 원금</label>
+              <input type="text" id="year-principal-amount" placeholder="ex) 50,000,000" oninput="this.value = formatNumberInput(this.value); calculateYearProfit();" required>
+            </div>
+            <div class="form-group">
+              <label>올해 총수익 (금액)</label>
+              <input type="text" id="year-profit-amount" placeholder="ex) +5,000,000" oninput="this.value = formatNumberInput(this.value); calculateYearProfit();" required>
+              <div id="year-profit-display" style="margin-top: 0.5rem; font-size: 0.95rem; font-weight: bold; min-height: 1.2rem;"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>계획한 원칙을 잘 지켰는가?</label>
+            <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+              <label style="cursor:pointer;"><input type="radio" name="year-rule" value="yes" onchange="toggleYearRuleDetail()" required> Yes</label>
+              <label style="cursor:pointer;"><input type="radio" name="year-rule" value="no" onchange="toggleYearRuleDetail()"> No</label>
+            </div>
+          </div>
+          <div class="form-group" id="year-rule-good-detail" style="display:none;">
+            <label>잘한 점 적기</label>
+            <textarea id="year-rule-good-text" placeholder="올해 투자에서 잘한 점을 작성해주세요"></textarea>
+          </div>
+          <div class="form-group" id="year-rule-bad-detail" style="display:none;">
+            <label>지켜지지 않은 원칙 + 판단의 혼동요인 적기</label>
+            <textarea id="year-rule-bad-text" placeholder="예: 비중 조절은 잘했으나, 뇌동매매 원칙을 어김 (시장 변동성에 흔들림)"></textarea>
+          </div>
+
+          <h3 style="margin-top:2rem; margin-bottom:1rem; color: #a5b4fc; font-size: 1.1rem;">내년 투자 계획</h3>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>현재 내 자산</label>
+              <input type="text" id="year-current-asset" placeholder="ex) 50,000,000" oninput="this.value = formatNumberInput(this.value)" required>
+            </div>
+            <div class="form-group">
+              <label>연간 목표 자산</label>
+              <input type="text" id="year-target-asset" placeholder="ex) 60,000,000" oninput="this.value = formatNumberInput(this.value)" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>매매 원칙 계획</label>
+            <textarea id="year-plan-principles" placeholder="내년에 지킬 구체적인 매매 원칙을 작성해주세요" required></textarea>
+          </div>
+          
+          <button type="submit" class="btn" style="margin-top: 1rem;">연간 기록 저장하기</button>
+        </form>
+      </div>
+      <div class="glass-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 class="section-title" style="margin-bottom: 0;">지난 연간 기록</h2>
+          <select id="yearFilter" onchange="renderPeriods(getStorageData())" style="padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: auto; min-width: 90px; font-size: 0.9rem;">
+            <option value="all">연도 전체</option>
+          </select>
+        </div>
+        <div id="yearList" class="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  </div> <!-- End of main-journal -->
+
+  <!-- 고정 손실 계산기 탭 -->
+  <div id="main-calculator" class="main-content">
+    <div class="container-single">
+      <div class="glass-panel">
+        <h2 class="section-title" style="margin-top: 0;">🧮 고정 손실 (Position Sizing) 계산기</h2>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>진입 가격 (원)</label>
+            <input type="text" id="calcEntryPrice" placeholder="ex) 50,000" oninput="handleCalcNumberInput(event)">
+          </div>
+          <div class="form-group">
+            <label>손실 허용률</label>
+            <div style="position: relative;">
+              <input type="number" step="0.1" id="calcStopLossPercent" placeholder="ex) 3" style="padding-right: 2rem; width: 100%; box-sizing: border-box;" oninput="calculatePositionSize()">
+              <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>고정 손실금 (허용 손실액, 원)</label>
+          <input type="text" id="calcFixedLoss" placeholder="ex) 100,000" oninput="handleCalcNumberInput(event)">
+        </div>
+        <div class="calc-result">
+          <div class="stat-label">권장 진입 개수 (주)</div>
+          <div class="stat-value" id="calcResultQuantity">0 주</div>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">
+            * 자동 계산된 청산 가격: <span id="calcResultStopPrice">0</span> 원<br>
+            * 총 진입 금액: <span id="calcResultAmount">0</span> 원
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 사이트 탭 -->
+  <div id="main-site" class="main-content">
+    <div class="container-single">
+      <div class="glass-panel">
+        <h2 class="section-title">🌐 내 즐겨찾기에 사이트 추가</h2>
+        <form onsubmit="saveSite(event)">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>사이트 이름</label>
+              <input type="text" id="siteTitle" placeholder="ex) 인베스팅닷컴" required>
+            </div>
+            <div class="form-group">
+              <label>URL</label>
+              <input type="url" id="siteUrl" placeholder="https://" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>설명 (용도)</label>
+            <input type="text" id="siteDesc" placeholder="ex) 미국 실시간 지수 및 경제 지표 확인용" required>
+          </div>
+          <button type="submit" class="btn">즐겨찾기 추가하기</button>
+        </form>
+      </div>
+      <div class="glass-panel">
+        <h2 class="section-title">⭐ 내 즐겨찾기 (자주 가는 사이트)</h2>
+        <div id="favoriteSiteGrid" class="site-grid"></div>
+      </div>
+      <div class="glass-panel">
+        <h2 class="section-title">💡 추천 사이트 모음</h2>
+        <div id="siteGrid" class="site-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- News Modal -->
+  <div id="newsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+    <div class="glass-panel" style="width: 90%; max-width: 800px; max-height: 80vh; display:flex; flex-direction:column; background:#1e1e2f; border:1px solid rgba(255,255,255,0.1); padding: 2rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 class="section-title" style="margin:0;">전체 스크랩 뉴스</h2>
+        <button onclick="closeNewsModal()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">✕</button>
+      </div>
+      <div id="newsModalList" style="overflow-y:auto; flex-grow:1; padding-right:0.5rem; display:flex; flex-direction:column; gap:1rem;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Trade Modal -->
+  <div id="tradeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+    <div class="glass-panel" style="width: 90%; max-width: 800px; max-height: 90vh; overflow-y:auto; background:#1e1e2f; border:1px solid rgba(255,255,255,0.1); padding: 2rem; position:relative;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2 class="section-title" style="margin:0; border:none; padding:0;">매매 일지 작성</h2>
+        <button type="button" onclick="closeTradeModal()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">✕</button>
+      </div>
+      <form id="tradeForm" onsubmit="saveTradeLog(event)">
+        <input type="hidden" id="tradeId">
+        
+        <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <button type="button" id="tradeTabBeforeBtn" onclick="switchTradeFormTab('before')" style="background:none; border:none; color:var(--accent-color); padding:0.8rem 1.5rem; cursor:pointer; font-weight:bold; border-bottom:2px solid var(--accent-color);">매수</button>
+          <button type="button" id="tradeTabAfterBtn" onclick="switchTradeFormTab('after')" style="background:none; border:none; color:var(--text-secondary); padding:0.8rem 1.5rem; cursor:pointer; font-weight:bold; border-bottom:2px solid transparent;">매도</button>
+        </div>
+
+        <div id="tradeSectionBefore">
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div class="form-group">
+              <label>날짜</label>
+              <input type="date" id="tradeDate" required>
+            </div>
+            <div class="form-group">
+              <label>종목명</label>
+              <input type="text" id="stockName" placeholder="삼성전자, TSLA 등" required>
+            </div>
+            <div class="form-group">
+              <label>포지션 (선택)</label>
+              <select id="tradePosition" style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary);">
+                <option value="">선택안함</option>
+                <option value="Long">Long</option>
+                <option value="Short">Short</option>
+              </select>
+            </div>
+          </div>
+          <div class="section-title">📊 (1) 종목 / 시장 상황</div>
+          <div class="form-group">
+            <textarea id="marketContext" rows="2" placeholder="왜 이 종목을 골랐는지? / 시장 분위기가 어땠는지"></textarea>
+          </div>
+          <div class="section-title">🎯 (2) 진입 이유 및 계획</div>
+          <div class="form-group">
+            <label>기술적 근거 / 뉴스·재료</label>
+            <textarea id="entryReason" rows="2" placeholder="지지 및 저항, 거래량, 패턴, 관련 뉴스 등"></textarea>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>매도 계획</label>
+              <input type="text" id="exitPlan" placeholder="진입 이유가 사라지는 시점 등">
+            </div>
+            <div class="form-group">
+              <label>최대 허용 손실 (%)</label>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <input type="number" step="0.1" id="maxLoss" placeholder="ex) -3" style="flex-grow:1;">
+                <span style="color:var(--text-secondary); font-weight:bold;">%</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-title">💰 (3) 매수 정보</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>진입가</label>
+              <input type="text" id="entryPrice" oninput="this.value = formatNumberInput(this.value)" required>
+            </div>
+            <div class="form-group">
+              <label>수량</label>
+              <input type="text" id="quantity" placeholder="주" oninput="this.value = formatNumberInput(this.value)" required>
+            </div>
+          </div>
+        </div>
+
+        <div id="tradeSectionAfter" style="display:none;">
+          <div class="section-title">💰 (1) 매도 정보</div>
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+            <div class="form-group">
+              <label>청산 날짜</label>
+              <input type="date" id="exitDate">
+            </div>
+            <div class="form-group">
+              <label>청산가</label>
+              <input type="text" id="exitPrice" oninput="this.value = formatNumberInput(this.value)">
+            </div>
+            <div class="form-group">
+              <label>보유 시간</label>
+              <input type="text" id="holdingTime" placeholder="ex) 2시간, 3일">
+            </div>
+            <div class="form-group">
+              <label>승/무/패 (선택)</label>
+              <select id="tradeResult" style="width:100%; padding:0.8rem; border-radius:8px; border:1px solid var(--panel-border); background:var(--input-bg); color:var(--text-primary);">
+                <option value="">선택안함 (수익금 자동 판별)</option>
+                <option value="win">승 (Win)</option>
+                <option value="tie">무 (Tie)</option>
+                <option value="loss">패 (Loss)</option>
+              </select>
+            </div>
+          </div>
+          <div class="section-title">🔍 (2) 매도 후 복기 (잘한 점 / 아쉬운 점)</div>
+          <div class="form-group">
+            <textarea id="reviewGoodBad" rows="2" placeholder="계획대로 이행했는지, 감정 개입이 있었는지, 원칙을 지켰는지"></textarea>
+          </div>
+          <div class="section-title">🚀 (3) 다음에 개선할 점</div>
+          <div class="form-group">
+            <textarea id="improvements" rows="2" placeholder="반복하지 말아야 할 실수, 유지할 좋은 습관"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1rem;">
+          <button type="button" id="tradeDeleteBtn" class="delete-btn" style="display:none; position:relative; right:auto; top:auto; width:auto; padding:0.8rem 1.5rem;" onclick="deleteCurrentTrade()">✕ 삭제</button>
+          <div style="flex-grow:1;"></div>
+          <button type="submit" class="btn" style="width:auto; padding: 0.8rem 2rem;">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('input[type="date"]').forEach(el => el.value = todayStr);
+
+    let currentFilter = 'all';
+
+    const DEFAULT_SITES = [
+      // 거장 포트폴리오
+      { category: "거장 포트폴리오", title: "Dataroma", url: "https://www.dataroma.com", desc: "미국 월스트릿 거장들의 포폴", market: ["US"] },
+      { category: "거장 포트폴리오", title: "hedgefollow", url: "https://hedgefollow.com", desc: "유명 헤지펀드와 투자 대가의 포폴 추적", market: ["US"] },
+      { category: "거장 포트폴리오", title: "WhaleWisdom", url: "https://whalewisdom.com", desc: "미국 거장들의 포트폴리오 추적", market: ["US"] },
+      { category: "거장 포트폴리오", title: "Whale Insight Pro", url: "https://whale-insight.com/", desc: "국내 포폴(국민연금, 버핏 지분 변동 분석, 실시간이 아닌 공시기반)", market: ["KR", "US"] },
+      { category: "거장 포트폴리오", title: "ETF.com", url: "https://www.etf.com", desc: "우량 ETF들의 보유 비중", market: ["US", "KR"] },
+
+      // 기업 분석
+      { category: "기업 분석", title: "트레이딩 뷰", url: "https://kr.tradingview.com", desc: "차트 분석 도구", market: ["US", "KR"] },
+      { category: "기업 분석", title: "스탁이지", url: "https://stockeasy.kr", desc: "국내 주식 맞춤 리서치", market: ["KR"] },
+      { category: "기업 분석", title: "Finviz", url: "https://finviz.com", desc: "미국 주식 종목 스크리닝", market: ["US"] },
+      { category: "기업 분석", title: "SEC.gov", url: "https://www.sec.gov", desc: "미국 증권거래위원회", market: ["US"] },
+      { category: "기업 분석", title: "핀텔", url: "https://fintel.io", desc: "기관 투자자 보유 현황", market: ["US", "KR"] },
+      { category: "기업 분석", title: "DART", url: "https://dart.fss.or.kr", desc: "회사 공시 사업보고서 및 중요 투자자 반응", market: ["KR"] },
+      { category: "기업 분석", title: "한국거래소 정보데이터시스템", url: "http://data.krx.co.kr", desc: "국내 증시와 관련된 다양한 통계 정보", market: ["KR"] },
+      { category: "기업 분석", title: "네이버증권", url: "https://finance.naver.com", desc: "회사 기본정보 혹은 해당기업 투자자 반응", market: ["KR", "US"] },
+      { category: "기업 분석", title: "thinkpool", url: "https://www.thinkpool.com", desc: "주요 섹터 및 신규기업 리포트", market: ["KR"] },
+      { category: "기업 분석", title: "macrotrends", url: "https://www.macrotrends.net", desc: "10년치 이상의 매출과 이익, P/E추이 등을 차트로 볼 수 있다.", market: ["US"] },
+      { category: "기업 분석", title: "tipranks", url: "https://www.tipranks.com", desc: "내부자 거래 추적", market: ["US"] },
+
+      // 경제흐름
+      { category: "경제흐름", title: "Trading Economics", url: "https://tradingeconomics.com", desc: "전 세계 금리, 물가상승률, 원자재 가격 추이", market: ["US", "KR"] },
+      { category: "경제흐름", title: "daily_byte", url: "https://www.mydailybyte.com/", desc: "비즈니스 및 경제 흐름", market: ["KR", "US"] },
+      { category: "경제흐름", title: "어피티", url: "https://uppity.co.kr", desc: "경제 뉴스레터", market: ["KR", "US"] },
+      { category: "경제흐름", title: "한국무역통계정보포털 TRASS", url: "https://www.trass.or.kr", desc: "데이터 기반 무역 분석 플랫폼", market: ["KR"] },
+      { category: "경제흐름", title: "인베스팅 닷컴", url: "https://kr.investing.com", desc: "금융정보 실시간 시세 무료 확인, 전세계 주요지수랑 중요한 일정", market: ["US", "KR"] },
+      { category: "경제흐름", title: "coffeepot", url: "https://coffeepot.me", desc: "해외비즈니스 이슈", market: ["US", "KR"] },
+      { category: "경제흐름", title: "시킹알파", url: "https://seekingalpha.com", desc: "미국주식 분석 등 정보", market: ["US"] },
+      { category: "경제흐름", title: "토스피드", url: "https://toss.im/tossfeed", desc: "트렌디한 이슈 풀이", market: ["KR", "US"] },
+      { category: "경제흐름", title: "한국예탁결제원 세이브로", url: "https://seibro.or.kr", desc: "유동화증권과 국내 투자자들의 해외 주식 거래 규모", market: ["KR", "US"] },
+
+      // 경제 사이트
+      { category: "경제 사이트", title: "KB Think", url: "https://kbthink.com/main.html", desc: "저축, 투자, 대출 등 카테고리별 정보", market: ["KR"] },
+      { category: "경제 사이트", title: "뱅크샐러드 머니피드", url: "https://www.banksalad.com", desc: "절약꿀팁, 세금정보, 카드추천", market: ["KR"] },
+      { category: "경제 사이트", title: "온통청년", url: "https://www.youthcenter.go.kr", desc: "청년 정책", market: ["KR"] },
+      { category: "경제 사이트", title: "예금보험공사", url: "https://www.kdic.or.kr", desc: "연령대별 금융상식", market: ["KR"] },
+      { category: "경제 사이트", title: "KRX 한국거래소", url: "https://www.krx.co.kr", desc: "주식 기본 교육", market: ["KR"] },
+      { category: "경제 사이트", title: "EBR", url: "https://home.ebs.co.kr/ebr", desc: "경제 다큐 프로그램", market: ["KR"] },
+      { category: "경제 사이트", title: "파인", url: "https://fine.fss.or.kr", desc: "계좌통합관리 금융상품정보", market: ["KR"] },
+      { category: "경제 사이트", title: "전국투자자교육협의회", url: "https://www.kcie.or.kr", desc: "재테크 기초강의 수강", market: ["KR"] },
+      { category: "경제 사이트", title: "한국은행", url: "https://www.bok.or.kr", desc: "기초 경제 이론", market: ["KR"] },
+      { category: "경제 사이트", title: "금융감독원", url: "https://www.fss.or.kr", desc: "생애주기별 금융 설계", market: ["KR"] },
+      { category: "경제 사이트", title: "한국개발연구원", url: "https://www.kdi.re.kr", desc: "시사 경제 분석", market: ["KR"] },
+      { category: "경제 사이트", title: "청소년 금융교육협의회", url: "https://www.fq.or.kr", desc: "초보 눈높이 상식", market: ["KR"] },
+      { category: "경제 사이트", title: "서민금융진흥원", url: "https://www.kinfa.or.kr", desc: "사회초년생 금융교육", market: ["KR"] },
+      { category: "경제 사이트", title: "신용회복위원회", url: "https://www.ccrs.or.kr", desc: "건전한 신용 교육", market: ["KR"] },
+      { category: "경제 사이트", title: "재정경제부 경제배움", url: "https://www.econedu.go.kr", desc: "경제 웹툰 퀴즈", market: ["KR"] },
+      { category: "경제 사이트", title: "서울시평생학습포털", url: "https://sll.seoul.go.kr", desc: "인문 경제, 자산 관리", market: ["KR"] },
+      { category: "경제 사이트", title: "매경 test", url: "https://exam.mk.co.kr", desc: "경제, 경영 상식 퀴즈", market: ["KR"] }
+    ].map((s, i) => ({ ...s, id: 'seed-' + i, type: 'site', isFavorite: false, createdAt: new Date().toISOString() }));
+
+    function getStorageData() {
+      const defaultData = { dailyLogs: [], trades: [], news: [], periodLogs: [], sites: [], sitesSeeded: false };
+      const data = localStorage.getItem('tradingJournalData');
+      if (data) {
+         try {
+           const parsed = JSON.parse(data);
+           // migrate old data structure
+           if(!parsed.news) parsed.news = [];
+           if(!parsed.periodLogs) parsed.periodLogs = [];
+           if(!parsed.sites) parsed.sites = [];
+           
+             // Force restore and update all default seeded sites while keeping user's favorite preferences
+             let migrated = false;
+             
+             // 1. Capture favorite states and custom edits of any existing seed sites
+             const seedFavMap = {};
+             const seedCustomMap = {};
+             parsed.sites.forEach(s => {
+               if (s.id && typeof s.id === 'string' && s.id.startsWith('seed-')) {
+                 seedFavMap[s.id] = s.isFavorite;
+                 if (s.customTitle) seedCustomMap[s.id + '_title'] = s.customTitle;
+                 if (s.customDesc) seedCustomMap[s.id + '_desc'] = s.customDesc;
+               }
+             });
+
+             // 2. Remove all existing seed sites from the array (we will reconstruct them)
+             parsed.sites = parsed.sites.filter(s => !(s.id && typeof s.id === 'string' && s.id.startsWith('seed-')));
+
+             // 3. Insert fresh DEFAULT_SITES and apply the saved favorite state & custom edits
+             DEFAULT_SITES.forEach(seed => {
+               const freshSeed = { ...seed };
+               if (seedFavMap[seed.id] !== undefined) {
+                 freshSeed.isFavorite = seedFavMap[seed.id];
+               } else {
+                 freshSeed.isFavorite = false;
+               }
+               if (seedCustomMap[seed.id + '_title']) freshSeed.customTitle = seedCustomMap[seed.id + '_title'];
+               if (seedCustomMap[seed.id + '_desc']) freshSeed.customDesc = seedCustomMap[seed.id + '_desc'];
+               
+               parsed.sites.push(freshSeed);
+               migrated = true;
+             });
+
+             // 4. Ensure any remaining custom user sites have isFavorite = true
+             parsed.sites.forEach(s => {
+               if (s.isFavorite === undefined) {
+                 s.isFavorite = true;
+                 migrated = true;
+               }
+             });
+             
+             if (migrated) localStorage.setItem('tradingJournalData', JSON.stringify(parsed));
+           return parsed;
+         } catch(e) {
+           console.error("Storage parsing error", e);
+           return defaultData;
+         }
+      }
+      defaultData.sites = DEFAULT_SITES;
+      defaultData.sitesSeeded = true;
+      return defaultData;
+    }
+
+    function openTradeModal(id = null) {
+      document.getElementById('tradeModal').style.display = 'flex';
+      document.getElementById('tradeForm').reset();
+      document.getElementById('tradeDate').value = todayStr;
+      document.getElementById('tradeId').value = '';
+      document.getElementById('tradeDeleteBtn').style.display = 'none';
+      switchTradeFormTab('before');
+      
+      if (id) {
+        const data = getStorageData();
+        const trade = data.trades.find(t => t.id === id);
+        if (trade) {
+          document.getElementById('tradeId').value = trade.id;
+          document.getElementById('tradeDate').value = trade.date;
+          document.getElementById('stockName').value = trade.stockName;
+          document.getElementById('tradePosition').value = trade.position || '';
+          document.getElementById('tradeResult').value = trade.result || '';
+          document.getElementById('marketContext').value = trade.marketContext;
+          document.getElementById('entryReason').value = trade.entryReason;
+          document.getElementById('exitPlan').value = trade.exitPlan;
+          document.getElementById('maxLoss').value = trade.maxLoss;
+          document.getElementById('entryPrice').value = trade.entryPrice;
+          document.getElementById('quantity').value = trade.quantity;
+          document.getElementById('exitDate').value = trade.exitDate || '';
+          document.getElementById('exitPrice').value = trade.exitPrice || '';
+          document.getElementById('holdingTime').value = trade.holdingTime || '';
+          document.getElementById('reviewGoodBad').value = trade.reviewGoodBad;
+          document.getElementById('improvements').value = trade.improvements;
+          document.getElementById('tradeDeleteBtn').style.display = 'block';
+        }
+      }
+    }
+
+    function closeTradeModal() {
+      document.getElementById('tradeModal').style.display = 'none';
+    }
+    
+    function switchTradeFormTab(tab) {
+      const beforeBtn = document.getElementById('tradeTabBeforeBtn');
+      const afterBtn = document.getElementById('tradeTabAfterBtn');
+      const beforeSec = document.getElementById('tradeSectionBefore');
+      const afterSec = document.getElementById('tradeSectionAfter');
+      
+      if (tab === 'before') {
+        beforeBtn.style.color = 'var(--accent-color)';
+        beforeBtn.style.borderBottom = '2px solid var(--accent-color)';
+        afterBtn.style.color = 'var(--text-secondary)';
+        afterBtn.style.borderBottom = '2px solid transparent';
+        beforeSec.style.display = 'block';
+        afterSec.style.display = 'none';
+      } else {
+        afterBtn.style.color = 'var(--accent-color)';
+        afterBtn.style.borderBottom = '2px solid var(--accent-color)';
+        beforeBtn.style.color = 'var(--text-secondary)';
+        beforeBtn.style.borderBottom = '2px solid transparent';
+        afterSec.style.display = 'block';
+        beforeSec.style.display = 'none';
+      }
+    }
+    
+    function deleteCurrentTrade() {
+      const id = document.getElementById('tradeId').value;
+      if (id) {
+        deleteItem(id, 'trade');
+        closeTradeModal();
+      }
+    }
+
+    function loadDailyData() {
+      const targetDate = document.getElementById('dailyDate').value;
+      if(!targetDate) return;
+      const data = getStorageData();
+      const existing = data.dailyLogs.find(d => d.date === targetDate);
+      document.getElementById('dailyPlan').value = existing ? (existing.plan || '') : '';
+      document.getElementById('dailySummary').value = existing ? (existing.summary || '') : '';
+    }
+
+    function saveDailyPlan() { saveDailyPartial('plan'); }
+    function saveDailySummary() { saveDailyPartial('summary'); }
+
+    function saveDailyPartial(field) {
+      const data = getStorageData();
+      const targetDate = document.getElementById('dailyDate').value;
+      if(!targetDate) return alert("날짜를 선택해주세요.");
+      
+      let existing = data.dailyLogs.find(d => d.date === targetDate);
+      if (existing) {
+        if(field === 'plan') existing.plan = document.getElementById('dailyPlan').value;
+        if(field === 'summary') existing.summary = document.getElementById('dailySummary').value;
+      } else {
+        existing = {
+          id: Date.now().toString(), type: 'daily',
+          date: targetDate,
+          plan: field === 'plan' ? document.getElementById('dailyPlan').value : '',
+          summary: field === 'summary' ? document.getElementById('dailySummary').value : '',
+          createdAt: new Date().toISOString()
+        };
+        data.dailyLogs.push(existing);
+      }
+      setStorageData(data);
+      alert(field === 'plan' ? '계획이 저장되었습니다.' : '복기가 저장되었습니다.');
+    }
+
+    function filterTotalTrades() {
+      const searchVal = document.getElementById('totalTradeSearch').value.trim().toLowerCase();
+      const groups = document.querySelectorAll('.history-group');
+      groups.forEach(group => {
+        const dateText = group.querySelector('summary').innerText.toLowerCase(); 
+        if(dateText.includes(searchVal)) {
+          group.style.display = '';
+        } else {
+          group.style.display = 'none';
+        }
+      });
+    }
+
+    function saveTradeLog(e) {
+      e.preventDefault();
+      const data = getStorageData();
+      
+      const tradeId = document.getElementById('tradeId').value;
+      const entryPrice = parseFloat(document.getElementById('entryPrice').value.replace(/,/g, ''));
+      const quantity = parseFloat(document.getElementById('quantity').value.replace(/,/g, ''));
+      let exitDateVal = document.getElementById('exitDate').value;
+      const exitPriceStr = document.getElementById('exitPrice').value.replace(/,/g, '');
+      const exitPrice = exitPriceStr ? parseFloat(exitPriceStr) : null;
+      if (exitPrice !== null && !exitDateVal) {
+        exitDateVal = todayStr;
+      }
+
+      let profitAmount = null;
+      let isWin = null;
+      let returnRate = null;
+      
+      const position = document.getElementById('tradePosition').value;
+      const resultOpt = document.getElementById('tradeResult').value;
+
+      if (exitPrice !== null) {
+        if (position === 'Short') {
+          profitAmount = (entryPrice - exitPrice) * quantity;
+          returnRate = ((entryPrice - exitPrice) / entryPrice) * 100;
+        } else { // Defaults to Long calculation if empty
+          profitAmount = (exitPrice - entryPrice) * quantity;
+          returnRate = ((exitPrice - entryPrice) / entryPrice) * 100;
+        }
+      }
+
+      if (resultOpt === 'win') isWin = true;
+      else if (resultOpt === 'loss') isWin = false;
+      else if (resultOpt === 'tie') isWin = null;
+      else if (profitAmount !== null) {
+        if (profitAmount > 0) isWin = true;
+        else if (profitAmount < 0) isWin = false;
+        else isWin = null;
+      }
+
+      const tradeData = {
+        date: document.getElementById('tradeDate').value,
+        stockName: document.getElementById('stockName').value,
+        position: position,
+        result: resultOpt,
+        marketContext: document.getElementById('marketContext').value,
+        entryReason: document.getElementById('entryReason').value,
+        exitPlan: document.getElementById('exitPlan').value,
+        maxLoss: document.getElementById('maxLoss').value,
+        entryPrice: document.getElementById('entryPrice').value,
+        quantity: document.getElementById('quantity').value,
+        exitDate: exitDateVal,
+        exitPrice: document.getElementById('exitPrice').value,
+        holdingTime: document.getElementById('holdingTime').value,
+        reviewGoodBad: document.getElementById('reviewGoodBad').value,
+        improvements: document.getElementById('improvements').value,
+        profitAmount: profitAmount,
+        returnRate: returnRate,
+        isWin: isWin
+      };
+
+      if (tradeId) {
+        // Edit existing
+        const index = data.trades.findIndex(t => t.id === tradeId);
+        if (index !== -1) {
+          tradeData.id = tradeId;
+          tradeData.createdAt = data.trades[index].createdAt;
+          data.trades[index] = tradeData;
+        }
+      } else {
+        // Create new
+        tradeData.id = Date.now().toString();
+        tradeData.type = 'trade';
+        tradeData.createdAt = new Date().toISOString();
+        data.trades.push(tradeData);
+      }
+
+      setStorageData(data);
+      closeTradeModal();
+    }
+
+    function setStorageData(data) {
+      localStorage.setItem('tradingJournalData', JSON.stringify(data));
+      renderAll();
+    }
+
+    // Delete unified
+    function deleteItem(id, type) {
+      if(!confirm('정말 삭제하시겠습니까?')) return;
+      const data = getStorageData();
+      if (type === 'daily') data.dailyLogs = data.dailyLogs.filter(item => item.id !== id);
+      else if (type === 'trade') data.trades = data.trades.filter(item => item.id !== id);
+      else if (type === 'news') data.news = data.news.filter(item => item.id !== id);
+      else if (type === 'period') data.periodLogs = data.periodLogs.filter(item => item.id !== id);
+      else if (type === 'site') {
+        if (id.startsWith('seed-')) {
+          const site = data.sites.find(s => s.id === id);
+          if (site) site.isFavorite = false;
+        } else {
+          data.sites = data.sites.filter(item => item.id !== id);
+        }
+      }
+      
+      setStorageData(data);
+    }
+
+    function toggleFavoriteSite(id) {
+      const data = getStorageData();
+      const site = data.sites.find(s => s.id === id);
+      if (site) {
+        site.isFavorite = !site.isFavorite;
+        setStorageData(data);
+      }
+    }
+
+    // Save Handlers
+    function saveDailyLog(e) {
+      e.preventDefault();
+      const data = getStorageData();
+      const newLog = {
+        id: Date.now().toString(), type: 'daily',
+        date: document.getElementById('dailyDate').value,
+        plan: document.getElementById('dailyPlan').value,
+        summary: document.getElementById('dailySummary').value,
+        createdAt: new Date().toISOString()
+      };
+      data.dailyLogs.push(newLog);
+      setStorageData(data);
+      e.target.reset();
+      document.getElementById('dailyDate').value = todayStr;
+      alert('오늘의 기록이 저장되었습니다.');
+    }
+
+    function saveNews(e) {
+      e.preventDefault();
+      const data = getStorageData();
+      const newNews = {
+        id: Date.now().toString(), type: 'news',
+        date: document.getElementById('newsDate').value,
+        title: document.getElementById('newsTitle').value,
+        link: document.getElementById('newsLink').value,
+        comment: document.getElementById('newsComment').value,
+        createdAt: new Date().toISOString()
+      };
+      data.news.push(newNews);
+      setStorageData(data);
+      e.target.reset();
+      document.getElementById('newsDate').value = todayStr;
+      alert('뉴스가 저장되었습니다.');
+    }
+
+    function formatNumberInput(val) {
+      if (!val) return '';
+      const sign = val.startsWith('-') ? '-' : (val.startsWith('+') ? '+' : '');
+      const numStr = val.replace(/[^0-9]/g, '');
+      if (!numStr) return sign;
+      return sign + parseInt(numStr, 10).toLocaleString();
+    }
+
+    function calculateYearProfit() {
+      const principalStr = document.getElementById('year-principal-amount').value.replace(/[^0-9-]/g, '');
+      const profitInput = document.getElementById('year-profit-amount');
+      const profitStr = profitInput.value.replace(/[^0-9-]/g, '');
+      const display = document.getElementById('year-profit-display');
+      
+      const principal = parseFloat(principalStr);
+      const profit = parseFloat(profitStr);
+      
+      if (!isNaN(profit) && profit !== 0) {
+        profitInput.style.color = profit > 0 ? '#ef4444' : '#3b82f6';
+      } else {
+        profitInput.style.color = '';
+      }
+      
+      if (!isNaN(principal) && !isNaN(profit) && principal !== 0) {
+        const rate = (profit / principal) * 100;
+        
+        const sign = rate > 0 ? '+' : '';
+        const color = rate > 0 ? '#ef4444' : (rate < 0 ? '#3b82f6' : 'var(--text-color)');
+        
+        display.innerHTML = `수익률: <span style="color:${color};">${sign}${rate.toFixed(2)}%</span>`;
+        display.dataset.rate = `${sign}${rate.toFixed(2)}%`;
+      } else {
+        display.innerHTML = '';
+        display.dataset.rate = '';
+      }
+    }
+
+    function toggleYearRuleDetail() {
+      const ruleVal = document.querySelector('input[name="year-rule"]:checked')?.value;
+      document.getElementById('year-rule-good-detail').style.display = ruleVal ? 'block' : 'none';
+      document.getElementById('year-rule-bad-detail').style.display = ruleVal === 'no' ? 'block' : 'none';
+    }
+
+    let editingYearId = null;
+    let editingMonthId = null;
+    let editingQuarterId = null;
+    let editingWeekId = null;
+
+    function editMonthLog(id) {
+      const data = getStorageData();
+      const log = data.periodLogs.find(p => p.id === id);
+      if (!log) return;
+      
+      editingMonthId = id;
+      
+      const form = document.querySelector('#journal-month form');
+      if (log.date) {
+        form.querySelector('#month-target-year').value = log.date.substring(0, 4);
+        form.querySelector('#month-target-month').value = log.date.substring(5, 7);
+      }
+      form.querySelector('.period-market').value = log.market || '';
+      form.querySelector('.period-sector').value = log.sector || '';
+      form.querySelector('.period-portfolio').value = log.portfolio || '';
+      form.querySelector('.period-review').value = log.review || '';
+      
+      const formBtn = form.querySelector('button[type="submit"]');
+      if (formBtn) {
+        formBtn.innerText = '월간 분석 수정하기';
+        formBtn.style.backgroundColor = '#f59e0b';
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function editWeekLog(id) {
+      const data = getStorageData();
+      const log = data.periodLogs.find(p => p.id === id);
+      if (!log) return;
+      
+      editingWeekId = id;
+      const form = document.querySelector('#journal-week form');
+      form.querySelector('.period-date').value = log.date || '';
+      form.querySelector('.period-reason').value = log.reason || log.plan || '';
+      form.querySelector('.period-feedback').value = log.feedback || log.summary || '';
+      
+      const formBtn = form.querySelector('#journal-week button[type="submit"]');
+      if (formBtn) {
+        formBtn.innerText = '수정하기';
+        formBtn.style.backgroundColor = '#fbbf24';
+      }
+      
+      renderWeeklyFormCalendar(log.date);
+      
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.journal-content').forEach(c => c.classList.remove('active'));
+      const weekTabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.includes('주간'));
+      if(weekTabBtn) weekTabBtn.classList.add('active');
+      document.getElementById('journal-week').classList.add('active');
+      
+      form.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function editQuarterLog(id) {
+      const data = getStorageData();
+      const log = data.periodLogs.find(p => p.id === id);
+      if (!log) return;
+      
+      editingQuarterId = id;
+      
+      const form = document.querySelector('#journal-quarter form');
+      form.querySelector('#quarterYear').value = log.quarterYear || '';
+      form.querySelector('#quarterQ').value = log.quarterQ || '';
+      form.querySelector('#quarterStock').value = log.stockName || '';
+      form.querySelector('.q-revenue').value = log.rev || '';
+      form.querySelector('.q-op-profit').value = log.op || '';
+      form.querySelector('.q-fcf').value = log.fcf || '';
+      form.querySelector('.q-roe').value = log.roe || '';
+      
+      if (log.improve) {
+        const radio = form.querySelector(`input[name="q-improve"][value="${log.improve}"]`);
+        if (radio) radio.checked = true;
+      }
+      if (log.outlook) {
+        const radio = form.querySelector(`input[name="q-outlook"][value="${log.outlook}"]`);
+        if (radio) radio.checked = true;
+      }
+      
+      const tbody = document.getElementById('brokerageTbody');
+      tbody.innerHTML = '';
+      if (log.brokerages && log.brokerages.length > 0) {
+        log.brokerages.forEach(b => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+          tr.innerHTML = `
+            <td style="padding: 0.5rem;" class="b-name">${b.name}</td>
+            <td style="padding: 0.5rem;" class="b-price">${b.price}</td>
+            <td style="padding: 0.5rem; text-align: right;"><button type="button" onclick="this.closest('tr').remove()" style="background:none; border:none; color:#ef4444; cursor:pointer;">✕</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      
+      const formBtn = form.querySelector('button[type="submit"]');
+      if (formBtn) {
+        formBtn.innerText = '기업 실적 점검표 수정하기';
+        formBtn.style.backgroundColor = '#f59e0b';
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function editYearLog(id) {
+      const data = getStorageData();
+      const log = data.periodLogs.find(p => p.id === id);
+      if (!log) return;
+      
+      editingYearId = id;
+      
+      const yearStr = log.date.substring(0,4);
+      document.getElementById('year-target-year').value = yearStr || new Date().getFullYear();
+      
+      document.getElementById('year-principal-amount').value = log.yearPrincipalAmount || log.yearInvestedAmount || '';
+      document.getElementById('year-profit-amount').value = log.yearProfitAmount || '';
+      
+      const ruleRadios = document.getElementsByName('year-rule');
+      for (let r of ruleRadios) {
+        if (r.value === log.ruleCheck) r.checked = true;
+      }
+      
+      document.getElementById('year-rule-good-text').value = log.ruleGoodText || '';
+      if (log.ruleCheck === 'no') {
+        document.getElementById('year-rule-bad-text').value = log.ruleBadText || '';
+      }
+      toggleYearRuleDetail();
+      
+      document.getElementById('year-current-asset').value = log.currentAsset || '';
+      document.getElementById('year-target-asset').value = log.targetAsset || '';
+      document.getElementById('year-plan-principles').value = log.planPrinciples || '';
+      
+      calculateYearProfit();
+      
+      const formBtn = document.querySelector('#journal-year form button[type="submit"]');
+      if (formBtn) {
+        formBtn.innerText = '연간 기록 수정하기';
+        formBtn.style.backgroundColor = '#f59e0b';
+      }
+      
+      window.scrollTo(0, 0);
+    }
+
+    function saveYearLog(e) {
+      e.preventDefault();
+      const data = getStorageData();
+      
+      const ruleVal = document.querySelector('input[name="year-rule"]:checked').value;
+      const targetYear = document.getElementById('year-target-year').value;
+      const yearDateStr = `${targetYear}-12-31`;
+
+      if (editingYearId) {
+        const index = data.periodLogs.findIndex(p => p.id === editingYearId);
+        if (index !== -1) {
+          const existing = data.periodLogs[index];
+          existing.date = yearDateStr;
+          existing.yearPrincipalAmount = document.getElementById('year-principal-amount').value;
+          existing.yearProfitAmount = document.getElementById('year-profit-amount').value;
+          existing.yearProfitRate = document.getElementById('year-profit-display').dataset.rate || '';
+          existing.ruleCheck = ruleVal;
+          existing.ruleGoodText = document.getElementById('year-rule-good-text').value;
+          existing.ruleBadText = ruleVal === 'no' ? document.getElementById('year-rule-bad-text').value : '';
+          existing.currentAsset = document.getElementById('year-current-asset').value;
+          existing.targetAsset = document.getElementById('year-target-asset').value;
+          existing.planPrinciples = document.getElementById('year-plan-principles').value;
+        }
+        editingYearId = null;
+        const formBtn = document.querySelector('#journal-year form button[type="submit"]');
+        if (formBtn) {
+          formBtn.innerText = '연간 기록 저장하기';
+          formBtn.style.backgroundColor = '';
+        }
+        alert('연간 기록이 수정되었습니다.');
+      } else {
+        const log = {
+          id: Date.now().toString(),
+          type: 'period',
+          periodType: 'year',
+          date: yearDateStr,
+          yearPrincipalAmount: document.getElementById('year-principal-amount').value,
+          yearProfitAmount: document.getElementById('year-profit-amount').value,
+          yearProfitRate: document.getElementById('year-profit-display').dataset.rate || '',
+          ruleCheck: ruleVal,
+          ruleGoodText: document.getElementById('year-rule-good-text').value,
+          ruleBadText: ruleVal === 'no' ? document.getElementById('year-rule-bad-text').value : '',
+          currentAsset: document.getElementById('year-current-asset').value,
+          targetAsset: document.getElementById('year-target-asset').value,
+          planPrinciples: document.getElementById('year-plan-principles').value,
+          createdAt: new Date().toISOString()
+        };
+        data.periodLogs.push(log);
+        alert('연간 기록이 저장되었습니다.');
+      }
+      
+      setStorageData(data);
+      e.target.reset();
+      document.getElementById('year-profit-display').innerHTML = '';
+      document.getElementById('year-profit-display').dataset.rate = '';
+      toggleYearRuleDetail();
+    }
+
+    function fetchTargetPrices() {
+      const stockName = document.getElementById('quarterStock').value.trim();
+      if (!stockName) {
+        alert('종목명을 먼저 입력해주세요.');
+        return;
+      }
+      
+      const tbody = document.getElementById('brokerageTbody');
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 1rem;">데이터를 불러오는 중입니다...</td></tr>';
+      
+      setTimeout(() => {
+        tbody.innerHTML = '';
+        const brokers = ['NH투자증권', '한국투자증권', '미래에셋증권', 'KB증권', '삼성증권', '키움증권'];
+        const count = Math.floor(Math.random() * 3) + 3; // 3~5개
+        const shuffled = brokers.sort(() => 0.5 - Math.random());
+        
+        let basePrice = 50000;
+        if (stockName.includes('삼성전자')) basePrice = 85000;
+        else if (stockName.includes('하이닉스')) basePrice = 180000;
+        else if (stockName.includes('카카오')) basePrice = 60000;
+        else if (stockName.includes('현대차')) basePrice = 250000;
+        else basePrice = Math.floor(Math.random() * 100000) + 10000;
+
+        let results = [];
+        for (let i = 0; i < count; i++) {
+          const bName = shuffled[i];
+          const price = basePrice + (Math.floor(Math.random() * 21) - 10) * 1000; 
+          results.push({ name: bName, price: price });
+        }
+        
+        results.sort((a, b) => b.price - a.price);
+
+        results.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+          tr.innerHTML = `
+            <td style="padding: 0.5rem;" class="b-name">${item.name}</td>
+            <td style="padding: 0.5rem;" class="b-price">${item.price.toLocaleString()}원</td>
+            <td style="padding: 0.5rem; text-align: right;"><button type="button" onclick="this.closest('tr').remove()" style="background:none; border:none; color:#ef4444; cursor:pointer;">✕</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }, 800);
+    }
+
+    function autoAnalyzeMonth(btn) {
+      const yy = document.getElementById('month-target-year').value;
+      const mm = document.getElementById('month-target-month').value;
+      if (!yy || !mm) return alert('분석할 연도와 월을 선택해주세요.');
+
+      const prefix = `${yy}-${mm}`;
+      const data = getStorageData();
+      
+      const monthlyTrades = data.trades.filter(t => t.date.startsWith(prefix));
+      const monthlyWeeks = data.periodLogs.filter(p => p.periodType === 'week' && p.date.startsWith(prefix));
+      
+      const originalText = btn.innerText;
+      btn.innerText = '데이터 분석 중...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        const markets = [
+          "- 금리 인하 기대감으로 증시 전반적 반등세 지속\n- 외국인과 기관의 쌍끌이 순매수 유입 확인\n- 코스피 주요 저항선 돌파 후 새로운 상승 추세 형성 모색 중",
+          "- 인플레이션 지표 둔화 지연에 따른 금리 부담 상존\n- 외국인 자금 일부 이탈 및 기관 관망세\n- 단순 기술적 반등 후 재차 박스권 장세 진입",
+          "- 뚜렷한 상승 모멘텀 부재 속 유동성 축소\n- 외국인 선물 매도와 기관 현물 매도의 핑퐁 장세\n- 전반적 하락 추세 속 짧은 반등에 그침"
+        ];
+        const sectors = [
+          "- 반도체 및 AI, 전력 설비 관련주 강세 뚜렷\n- 2차전지 등 기존 주도주 기간 조정 국면 지속\n- 밸류업 프로그램 관련 저PBR (금융, 지주 등) 가치주 자금 순환",
+          "- 방산, 조선, 기계 등 수출 호조 수주 산업 릴레이 강세\n- 바이오, 헬스케어 단기 모멘텀 부각되며 단기 급등\n- 성장주 중심의 수급 쏠림 현상 심화",
+          "- 금리 부담에 따른 배당주, 통신주 위주 방어적 흐름\n- 실적 발표에 따른 종목별 극심한 차별화 장세\n- 뚜렷한 주도 섹터 없이 빠른 순환매 장세"
+        ];
+        
+        let buyCount = 0, sellCount = 0;
+        let popularStock = {};
+        monthlyTrades.forEach(t => {
+          if (t.type === 'buy') buyCount++;
+          else sellCount++;
+          popularStock[t.stockName] = (popularStock[t.stockName] || 0) + 1;
+        });
+
+        const sortedStocks = Object.keys(popularStock).sort((a,b) => popularStock[b] - popularStock[a]);
+        const mainStock = sortedStocks.length > 0 ? sortedStocks[0] : '없음';
+        
+        let reviewStr = `- 한 달 동안 총 ${monthlyTrades.length}회의 매매 발생 (매수 ${buyCount}회, 매도 ${sellCount}회)\n`;
+        reviewStr += `- 주요 거래 종목: ${mainStock}\n`;
+        
+        if (monthlyTrades.length === 0) {
+          reviewStr += `- 한 달 간 매매 없이 관망세를 유지했습니다. 인내심을 갖고 원칙을 지켰다면 긍정적입니다.\n`;
+        } else if (buyCount > sellCount * 2) {
+          reviewStr += `- 하락장 혹은 조정장에서 분할 매수 원칙을 적극적으로 시도한 것으로 보입니다. (비중 조절 주의)\n`;
+        } else if (sellCount > buyCount * 2) {
+          reviewStr += `- 차익 실현 혹은 손절매 위주의 보수적인 현금 확보 전략을 취했습니다.\n`;
+        } else {
+          reviewStr += `- 매수와 매도 비중이 균형을 이루며 시장 흐름에 유연하게 대처했습니다.\n`;
+        }
+
+        if (monthlyWeeks.length > 0) {
+          const lastWeek = monthlyWeeks[monthlyWeeks.length-1].review || monthlyWeeks[monthlyWeeks.length-1].market || '';
+          const snippet = lastWeek.replace(/\n/g, ' ').substring(0, 40);
+          if (snippet) reviewStr += `- 최근 주간 복기 요약: ${snippet}...\n`;
+        } else {
+          reviewStr += `- 이번 달 주간 기록이 부족합니다. 주간 복기를 꾸준히 남기면 원칙 준수 여부 파악에 도움이 됩니다.\n`;
+        }
+
+        const form = document.querySelector('#journal-month form');
+        form.querySelector('.period-market').value = markets[Math.floor(Math.random()*markets.length)];
+        form.querySelector('.period-sector').value = sectors[Math.floor(Math.random()*sectors.length)];
+        form.querySelector('.period-review').value = reviewStr;
+
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }, 1200);
+    }
+
+    function getWeekOfMonthStr(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      const year = d.getFullYear().toString().slice(-2);
+      const month = d.getMonth() + 1;
+      
+      const firstDayOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      const firstDayWeekday = firstDayOfMonth.getDay() === 0 ? 7 : firstDayOfMonth.getDay();
+      const offsetDate = d.getDate() + firstDayWeekday - 1;
+      const week = Math.ceil(offsetDate / 7);
+      
+      return `${year}년 ${month}월 ${week}주차`;
+    }
+
+    function renderWeeklyFormCalendar(dateStr) {
+      const container = document.getElementById('weeklyFormCalendarContainer');
+      if (!container || !dateStr) return;
+      
+      const data = getStorageData();
+      let calendarHtml = `<div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:1rem; text-align:center;">`;
+      const dayNames = ['월','화','수','목','금','토','일'];
+      dayNames.forEach(d => {
+        calendarHtml += `<div style="font-size:0.8rem; color:var(--text-secondary); padding:2px;">${d}</div>`;
+      });
+      
+      const targetDate = new Date(dateStr);
+      const dayOfWeek = targetDate.getDay();
+      const diffToMonday = targetDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+      const monday = new Date(targetDate);
+      monday.setDate(diffToMonday);
+      
+      for (let i = 0; i < 7; i++) {
+        const currentDay = new Date(monday);
+        currentDay.setDate(monday.getDate() + i);
+        
+        const yyyy = currentDay.getFullYear();
+        const mm = String(currentDay.getMonth() + 1).padStart(2, '0');
+        const dd = String(currentDay.getDate()).padStart(2, '0');
+        const dStr = `${yyyy}-${mm}-${dd}`;
+        
+        const dayTrades = data.trades.filter(t => t.date === dStr);
+        let dayProfit = 0;
+        dayTrades.forEach(t => {
+          if (t.profitAmount) dayProfit += t.profitAmount;
+        });
+        
+        let profitHtml = '<div style="height:14px; margin-top:2px;"></div>';
+        if (dayProfit > 0) {
+          profitHtml = `<div style="color:#ef4444; font-size:0.75rem; font-weight:bold; margin-top:2px;">+${dayProfit.toLocaleString()}</div>`;
+        } else if (dayProfit < 0) {
+          profitHtml = `<div style="color:#3b82f6; font-size:0.75rem; font-weight:bold; margin-top:2px;">${dayProfit.toLocaleString()}</div>`;
+        } else if (dayTrades.length > 0) {
+          profitHtml = `<div style="color:var(--text-secondary); font-size:0.75rem; font-weight:bold; margin-top:2px;">0</div>`;
+        }
+        
+        const isTarget = (dStr === dateStr) ? 'border: 1px solid var(--accent-color);' : 'border: 1px solid var(--panel-border);';
+        const bg = (dStr === dateStr) ? 'background: rgba(99,102,241,0.1);' : 'background: rgba(255,255,255,0.02);';
+        const isWeekend = (i === 5 || i === 6) ? 'opacity: 0.7;' : '';
+        
+        calendarHtml += `
+          <div style="padding: 0.5rem 2px; border-radius: 6px; ${isTarget} ${bg} ${isWeekend}">
+            <div style="font-size:0.9rem; color:var(--text-primary);">${currentDay.getDate()}</div>
+            ${profitHtml}
+          </div>
+        `;
+      }
+      calendarHtml += `</div>`;
+      container.innerHTML = `<label style="margin-bottom:0.5rem; display:block;">선택 주간 성과 요약</label>` + calendarHtml;
+    }
+
+    function autoAnalyzeStock() {
+      const stockName = document.getElementById('quarterStock').value.trim();
+      if (!stockName) {
+        alert('종목명을 먼저 입력해주세요.');
+        return;
+      }
+      
+      const revInput = document.querySelector('.q-revenue');
+      const opInput = document.querySelector('.q-op-profit');
+      const fcfInput = document.querySelector('.q-fcf');
+      const roeInput = document.querySelector('.q-roe');
+
+      if (!revInput.value) revInput.value = `- 전년 대비 매출 증가/감소 여부:\n- 주된 이유 (예: 판매 단가 상승, 판매량 증가 등):`;
+      if (!opInput.value) opInput.value = `- 영업이익 증감 여부:\n- 감소 시 원인 (원자재 가격 상승, 판관비 상승 등):\n- 증가 시 원인:`;
+      if (!fcfInput.value) fcfInput.value = `- 이익이 났음에도 투자나 재고 증가로 현금이 묶였는가?:\n- 현금이 묶여있다면 그 이유는?:\n- 현금흐름이 좋은 편인가?:`;
+      if (!roeInput.value) roeInput.value = `- ROE가 오르고 있는가 떨어지고 있는가? (오르면 자본을 잘 쓰고 있다는 의미):`;
+      
+      fetchTargetPrices();
+    }
+
+    function savePeriodLog(e, periodType) {
+      e.preventDefault();
+      const form = e.target;
+      const data = getStorageData();
+      
+      if (periodType === 'quarter') {
+        const year = form.querySelector('#quarterYear').value;
+        const q = form.querySelector('#quarterQ').value;
+        const monthMap = {'1': '03', '2': '06', '3': '09', '4': '12'};
+        const dateVal = `${year}-${monthMap[q]}-01`;
+        
+        const stockName = form.querySelector('#quarterStock').value;
+        const rev = form.querySelector('.q-revenue').value;
+        const op = form.querySelector('.q-op-profit').value;
+        const fcf = form.querySelector('.q-fcf').value;
+        const roe = form.querySelector('.q-roe').value;
+        
+        let improve = '';
+        const improveEl = form.querySelector('input[name="q-improve"]:checked');
+        if(improveEl) improve = improveEl.value;
+        
+        let outlook = '';
+        const outlookEl = form.querySelector('input[name="q-outlook"]:checked');
+        if(outlookEl) outlook = outlookEl.value;
+
+        const brokerages = [];
+        document.querySelectorAll('#brokerageTbody tr').forEach(tr => {
+          brokerages.push({
+            name: tr.querySelector('.b-name').innerText,
+            price: tr.querySelector('.b-price').innerText
+          });
+        });
+        
+        if (editingQuarterId) {
+          const index = data.periodLogs.findIndex(p => p.id === editingQuarterId);
+          if (index !== -1) {
+            const existing = data.periodLogs[index];
+            existing.date = dateVal;
+            existing.quarterYear = year;
+            existing.quarterQ = q;
+            existing.stockName = stockName;
+            existing.rev = rev;
+            existing.op = op;
+            existing.fcf = fcf;
+            existing.roe = roe;
+            existing.improve = improve;
+            existing.outlook = outlook;
+            existing.brokerages = brokerages;
+          }
+          editingQuarterId = null;
+          const formBtn = form.querySelector('button[type="submit"]');
+          if (formBtn) {
+            formBtn.innerText = '저장하기';
+            formBtn.style.backgroundColor = '';
+          }
+          alert('기업 실적 점검표가 수정되었습니다.');
+        } else {
+          const newLog = {
+            id: Date.now().toString(), type: 'period', periodType: periodType,
+            date: dateVal, quarterYear: year, quarterQ: q, stockName: stockName,
+            rev: rev, op: op, fcf: fcf, roe: roe,
+            improve: improve, outlook: outlook,
+            brokerages: brokerages,
+            createdAt: new Date().toISOString()
+          };
+          data.periodLogs.push(newLog);
+          alert('기업 실적 점검표가 저장되었습니다.');
+        }
+        
+        setStorageData(data);
+        form.reset();
+        document.getElementById('brokerageTbody').innerHTML = '';
+        
+        const d = new Date();
+        form.querySelector('#quarterYear').value = d.getFullYear();
+        form.querySelector('#quarterQ').value = Math.ceil((d.getMonth()+1)/3);
+        renderAll();
+        return;
+      }
+
+      if (periodType === 'month') {
+        const yyVal = form.querySelector('#month-target-year').value;
+        const mmVal = form.querySelector('#month-target-month').value;
+        const dateVal = `${yyVal}-${mmVal}`;
+        const market = form.querySelector('.period-market').value;
+        const sector = form.querySelector('.period-sector').value;
+        const portfolio = form.querySelector('.period-portfolio').value;
+        const review = form.querySelector('.period-review').value;
+
+        if (editingMonthId) {
+          const index = data.periodLogs.findIndex(p => p.id === editingMonthId);
+          if (index !== -1) {
+            const existing = data.periodLogs[index];
+            existing.date = dateVal;
+            existing.market = market;
+            existing.sector = sector;
+            existing.portfolio = portfolio;
+            existing.review = review;
+          }
+          editingMonthId = null;
+          const formBtn = form.querySelector('button[type="submit"]');
+          if (formBtn) {
+            formBtn.innerText = '저장하기';
+            formBtn.style.backgroundColor = '';
+          }
+          alert('월간 분석이 수정되었습니다.');
+        } else {
+          const newLog = {
+            id: Date.now().toString(), type: 'period', periodType: periodType,
+            date: dateVal, market: market, sector: sector, portfolio: portfolio, review: review,
+            createdAt: new Date().toISOString()
+          };
+          data.periodLogs.push(newLog);
+          alert('월간 분석이 저장되었습니다.');
+        }
+        setStorageData(data);
+        form.reset();
+        const d = new Date();
+        form.querySelector('#month-target-year').value = d.getFullYear();
+        form.querySelector('#month-target-month').value = String(d.getMonth() + 1).padStart(2, '0');
+        renderAll();
+        return;
+      }
+
+      if (periodType === 'week') {
+        const dateVal = form.querySelector('.period-date').value;
+        const reasonVal = form.querySelector('.period-reason').value;
+        const feedbackVal = form.querySelector('.period-feedback').value;
+
+        if (editingWeekId) {
+          const index = data.periodLogs.findIndex(p => p.id === editingWeekId);
+          if (index !== -1) {
+            const existing = data.periodLogs[index];
+            existing.date = dateVal;
+            existing.reason = reasonVal;
+            existing.feedback = feedbackVal;
+          }
+          editingWeekId = null;
+          const formBtn = form.querySelector('button[type="submit"]');
+          if (formBtn) {
+            formBtn.innerText = '주간 점검 저장하기';
+            formBtn.style.backgroundColor = '';
+          }
+          alert('주간 점검이 수정되었습니다.');
+        } else {
+          const newLog = {
+            id: Date.now().toString(), type: 'period', periodType: periodType,
+            date: dateVal, reason: reasonVal, feedback: feedbackVal,
+            createdAt: new Date().toISOString()
+          };
+          data.periodLogs.push(newLog);
+          alert('주간 점검이 저장되었습니다.');
+        }
+        setStorageData(data);
+        form.reset();
+        form.querySelector('.period-date').value = todayStr;
+        const calContainer = document.getElementById('weeklyFormCalendarContainer');
+        if(calContainer) calContainer.innerHTML = '';
+        renderWeeklyFormCalendar(todayStr);
+        renderAll();
+        return;
+      }
+    }
+
+    function saveSite(e) {
+      e.preventDefault();
+      const data = getStorageData();
+      const newSite = {
+        id: Date.now().toString(), type: 'site',
+        category: '기타', // 카테고리 입력란 제거에 따른 기본값 처리
+        title: document.getElementById('siteTitle').value,
+        url: document.getElementById('siteUrl').value,
+        desc: document.getElementById('siteDesc').value,
+        isFavorite: true,
+        createdAt: new Date().toISOString()
+      };
+      data.sites.push(newSite);
+      setStorageData(data);
+      e.target.reset();
+      alert('사이트가 추가되었습니다.');
+    }
+
+    function editSite(id) {
+      document.getElementById(`view-mode-${id}`).style.display = 'none';
+      document.getElementById(`edit-mode-${id}`).style.display = 'block';
+    }
+    
+    function cancelEditSite(id) {
+      document.getElementById(`edit-mode-${id}`).style.display = 'none';
+      document.getElementById(`view-mode-${id}`).style.display = 'block';
+    }
+
+    function saveEditSite(id) {
+      const newTitle = document.getElementById(`edit-title-${id}`).value;
+      const newDesc = document.getElementById(`edit-desc-${id}`).value;
+      
+      const data = getStorageData();
+      const site = data.sites.find(s => s.id === id);
+      if (site) {
+        if (id.startsWith('seed-')) {
+          site.customTitle = newTitle;
+          site.customDesc = newDesc;
+        } else {
+          site.title = newTitle;
+          site.desc = newDesc;
+        }
+        setStorageData(data);
+      }
+    }
+
+    // Calculator
+    function handleCalcNumberInput(e) {
+      let val = e.target.value.replace(/[^0-9]/g, '');
+      if (val) {
+        e.target.value = parseInt(val, 10).toLocaleString();
+      } else {
+        e.target.value = '';
+      }
+      calculatePositionSize();
+    }
+
+    function calculatePositionSize() {
+      const entryStr = document.getElementById('calcEntryPrice').value.replace(/,/g, '');
+      const fixedLossStr = document.getElementById('calcFixedLoss').value.replace(/,/g, '');
+      
+      const entryPrice = parseFloat(entryStr);
+      const stopLossPct = parseFloat(document.getElementById('calcStopLossPercent').value);
+      const fixedLoss = parseFloat(fixedLossStr);
+      
+      const resultQuantityEl = document.getElementById('calcResultQuantity');
+      const resultStopPriceEl = document.getElementById('calcResultStopPrice');
+      const resultAmountEl = document.getElementById('calcResultAmount');
+
+      if (isNaN(entryPrice) || isNaN(stopLossPct) || isNaN(fixedLoss) || entryPrice === 0 || stopLossPct === 0) {
+        resultQuantityEl.innerText = '0 주';
+        resultStopPriceEl.innerText = '0';
+        resultAmountEl.innerText = '0';
+        return;
+      }
+      
+      const lossPerShare = entryPrice * (stopLossPct / 100);
+      const stopPrice = entryPrice - lossPerShare;
+      const quantity = Math.floor(fixedLoss / lossPerShare);
+      const totalAmount = quantity * entryPrice;
+      
+      resultQuantityEl.innerText = quantity.toLocaleString() + ' 주';
+      resultStopPriceEl.innerText = Math.floor(stopPrice).toLocaleString();
+      resultAmountEl.innerText = totalAmount.toLocaleString();
+    }
+
+    function formatCurrency(n) { return n.toLocaleString() + ' 원'; }
+
+    function switchInnerTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(`${tab}-tab`).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function switchMainTab(tab) {
+      if (tab === 'journal' && document.getElementById('nav-journal').classList.contains('active')) {
+        const subNav = document.getElementById('journal-subnav-wrapper');
+        if (subNav) {
+          subNav.style.display = subNav.style.display === 'none' ? 'block' : 'none';
+        }
+        return;
+      }
+
+      document.querySelectorAll('.main-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      
+      const targetMain = document.getElementById('main-' + tab);
+      const targetNav = document.getElementById('nav-' + tab);
+      
+      if(targetMain) targetMain.classList.add('active');
+      if(targetNav) targetNav.classList.add('active');
+
+      if (tab === 'journal') {
+        const subNav = document.getElementById('journal-subnav-wrapper');
+        if (subNav) subNav.style.display = 'block';
+      }
+    }
+
+    function switchJournalTab(tab) {
+      document.querySelectorAll('.journal-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.jtab').forEach(el => el.classList.remove('active'));
+      
+      const targetContent = document.getElementById('journal-' + tab);
+      const targetTab = document.getElementById('jnav-' + tab);
+      
+      if(targetContent) targetContent.classList.add('active');
+      if(targetTab) targetTab.classList.add('active');
+    }
+
+    function filterHistory(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('#filter-all, #filter-daily, #filter-trade').forEach(el => el.classList.remove('active'));
+      document.getElementById(`filter-${filter}`).classList.add('active');
+      renderTrades();
+    }
+
+    // Render Logic
+    function renderAll() {
+      const yearSelect = document.getElementById('year-target-year');
+      if (yearSelect && yearSelect.options.length === 0) {
+        const currentYear = new Date().getFullYear();
+        const monthYearSelect = document.getElementById('month-target-year');
+        for (let i = currentYear - 10; i <= currentYear; i++) {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.innerText = i;
+          if (i === currentYear) opt.selected = true;
+          yearSelect.appendChild(opt);
+          
+          if (monthYearSelect) {
+            const optMonth = document.createElement('option');
+            optMonth.value = i;
+            optMonth.innerText = i;
+            if (i === currentYear) optMonth.selected = true;
+            monthYearSelect.appendChild(optMonth);
+          }
+        }
+      }
+      
+      const currentMonthStr = String(new Date().getMonth() + 1).padStart(2, '0');
+      const mmSelect = document.getElementById('month-target-month');
+      if (mmSelect && !mmSelect.dataset.init) {
+        mmSelect.value = currentMonthStr;
+        mmSelect.dataset.init = "true";
+      }
+
+      const data = getStorageData();
+      renderBriefing();
+      renderTrades(data);
+      renderNews(data);
+      renderPeriods(data);
+      renderSites(data);
+      renderWeeklyFormCalendar(todayStr);
+    }
+
+    function renderBriefing() {
+      const container = document.getElementById('dailyBriefingContent');
+      if (typeof DAILY_BRIEFING === 'undefined') {
+        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">브리핑 데이터가 없습니다. 아침 7시에 자동 업데이트됩니다.</p>';
+        return;
+      }
+      
+      const b = DAILY_BRIEFING;
+      let html = `
+        <div style="margin-bottom: 1.5rem;">
+          <h3 style="color: #a5b4fc; margin-bottom: 0.5rem; font-size: 1.1rem;">📊 금융 지표</h3>
+          <div class="grid-2">
+            <div class="stat-box" style="padding: 1rem;">
+              <div class="stat-label">원/달러 환율</div>
+              <div class="stat-value" style="font-size: 1.2rem;">${b.exchangeRate.value}</div>
+              <div style="font-size: 0.8rem; color: ${b.exchangeRate.change.includes('+') ? 'var(--danger-color)' : 'var(--success-color)'}; margin-top: 0.3rem;">전일 대비 ${b.exchangeRate.change}</div>
+            </div>
+            <div class="stat-box" style="padding: 1rem;">
+              <div class="stat-label">미 10년물 국채 금리</div>
+              <div class="stat-value" style="font-size: 1.2rem;">${b.treasuryYield.value}</div>
+              <div style="font-size: 0.8rem; margin-top: 0.3rem; color: var(--text-secondary)">${b.treasuryYield.change}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <h3 style="color: #a5b4fc; margin-bottom: 0.5rem; font-size: 1.1rem;">💡 오늘의 전략 시황 추천</h3>
+          <div style="background: rgba(99, 102, 241, 0.1); border-left: 4px solid var(--accent-color); padding: 1rem; border-radius: 4px; line-height: 1.5; font-size: 0.95rem; color: #e2e8f0;">
+            ${b.strategy}
+          </div>
+        </div>
+      `;
+
+      const renderNewsCategory = (title, newsArray) => {
+        let catHtml = `<h3 style="color: #a5b4fc; margin-bottom: 0.8rem; margin-top: 1.5rem; font-size: 1.1rem;">${title}</h3><div style="display: flex; flex-direction: column; gap: 1rem;">`;
+        newsArray.forEach(news => {
+          catHtml += `
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 8px; padding: 1rem;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem; gap:10px;">
+                <span style="color: #fff; font-weight: 600;">${news.title}</span>
+                <a href="${news.link}" target="_blank" style="color: var(--accent-color); text-decoration: none; font-size: 0.85rem; flex-shrink:0;">기사 원문 보기 ↗</a>
+              </div>
+              <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.5rem;">${news.summary}</p>
+              ${news.terms ? `<p style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; line-height: 1.4;"><strong>용어 해설:</strong> ${news.terms}</p>` : ''}
+              ${news.impact ? `<p style="font-size: 0.85rem; color: #a5b4fc; margin-top: 0.5rem; line-height: 1.4;"><strong>👉 내 자산 영향:</strong> ${news.impact}</p>` : ''}
+            </div>
+          `;
+        });
+        catHtml += '</div>';
+        return catHtml;
+      };
+
+      html += renderNewsCategory('🏢 부동산 주요 뉴스', b.realEstateNews);
+      html += renderNewsCategory('💰 금융 주요 뉴스', b.financeNews);
+      html += renderNewsCategory('📈 보유 종목 뉴스 (삼성전자, 한화에어로스페이스)', b.stockNews);
+
+      container.innerHTML = html;
+    }
+
+    function renderTrades(dataParam) {
+      const data = dataParam || getStorageData();
+      const currentToday = todayStr;
+      
+      // Stats
+      const completedTrades = data.trades.filter(t => t.isWin !== null);
+      document.getElementById('totalTradesStat').innerText = data.trades.length;
+      if (completedTrades.length > 0) {
+        const wins = completedTrades.filter(t => t.isWin).length;
+        const winRate = ((wins / completedTrades.length) * 100).toFixed(1);
+        document.getElementById('winRateStat').innerText = `${winRate}%`;
+        document.getElementById('winRateStat').className = winRate >= 50 ? 'stat-value profit' : 'stat-value loss';
+      } else {
+        document.getElementById('winRateStat').innerText = '0%';
+        document.getElementById('winRateStat').className = 'stat-value';
+      }
+
+      const todaysTrades = data.trades.filter(t => t.date === currentToday || t.exitDate === currentToday);
+      const todayTotalProfit = todaysTrades.reduce((sum, t) => sum + (t.profitAmount || 0), 0);
+      const profitStatEl = document.getElementById('todayProfitStat');
+      profitStatEl.innerText = (todayTotalProfit > 0 ? '+' : '') + formatCurrency(todayTotalProfit);
+      if (todayTotalProfit > 0) profitStatEl.className = 'stat-value profit';
+      else if (todayTotalProfit < 0) profitStatEl.className = 'stat-value loss';
+      else profitStatEl.className = 'stat-value';
+
+      // Populate Notion Tables
+      const renderNotionRow = (t, includeDate = true, includeStatus = false, targetDateStr = '') => {
+        let isWin = false, isLoss = false, isTie = false;
+        
+        if (t.result === 'win') isWin = true;
+        else if (t.result === 'loss') isLoss = true;
+        else if (t.result === 'tie') isTie = true;
+        else { 
+          if (t.profitAmount > 0) isWin = true;
+          else if (t.profitAmount < 0) isLoss = true;
+          else if (t.profitAmount === 0) isTie = true;
+        }
+        
+        let profitStr = t.profitAmount !== null ? formatCurrency(t.profitAmount) + ' 원' : '-';
+        if (t.profitAmount > 0) profitStr = `<span style="color:#ef4444;">+${profitStr}</span>`;
+        else if (t.profitAmount < 0) profitStr = `<span style="color:#3b82f6;">${profitStr}</span>`;
+
+        let posBadge = '', posText = '';
+        if (t.position === 'Short') { posBadge = 'short'; posText = 'Short'; }
+        else if (t.position === 'Long') { posBadge = 'long'; posText = 'Long'; }
+        else { posBadge = 'ticker'; posText = '-'; }
+
+        const dateTd = includeDate ? `<td>${t.date.replace(/-/g, '/')}</td>` : '';
+        
+        let statusTd = '';
+        if (includeStatus) {
+          let statusStr = '-';
+          if (t.date === targetDateStr && t.exitDate === targetDateStr) statusStr = '매수/매도';
+          else if (t.date === targetDateStr) statusStr = '매수';
+          else if (t.exitDate === targetDateStr) statusStr = '매도';
+          
+          let statusColor = 'rgba(255,255,255,0.1)';
+          if (statusStr === '매수') statusColor = 'rgba(239,68,68,0.2)';
+          if (statusStr === '매도') statusColor = 'rgba(59,130,246,0.2)';
+          if (statusStr === '매수/매도') statusColor = 'rgba(168,85,247,0.2)';
+          
+          statusTd = `<td><span class="notion-badge ticker" style="background:${statusColor};">${statusStr}</span></td>`;
+        }
+
+        return `
+          <tr style="cursor:pointer;" onclick="openTradeModal('${t.id}')">
+            ${dateTd}
+            <td><span class="notion-badge ticker">${t.stockName}</span></td>
+            <td>${posText !== '-' ? `<span class="notion-badge ${posBadge}">${posText}</span>` : '-'}</td>
+            <td><div class="notion-checkbox ${isWin ? 'checked' : ''}"></div></td>
+            <td><div class="notion-checkbox ${isTie ? 'checked' : ''}"></div></td>
+            <td><div class="notion-checkbox ${isLoss ? 'checked' : ''}"></div></td>
+            <td>${profitStr}</td>
+            ${statusTd}
+            <td><a href="javascript:void(0)" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;" onclick="event.stopPropagation(); openTradeModal('${t.id}')">➔ 클릭</a></td>
+          </tr>
+        `;
+      };
+
+      const notionTodayBody = document.getElementById('notionTodayBody');
+      if (notionTodayBody) {
+        notionTodayBody.innerHTML = '';
+        if (todaysTrades.length === 0) {
+          notionTodayBody.innerHTML = '<tr><td colspan="8" class="empty-row" style="text-align:center;">오늘 기록된 매매가 없습니다.</td></tr>';
+        } else {
+          todaysTrades.forEach(t => {
+            notionTodayBody.innerHTML += renderNotionRow(t, false, true, currentToday);
+          });
+        }
+      }
+
+      const holdings = data.trades.filter(t => !t.exitDate);
+      const notionHoldingsBody = document.getElementById('notionHoldingsBody');
+      if (notionHoldingsBody) {
+        notionHoldingsBody.innerHTML = '';
+        if (holdings.length === 0) {
+          notionHoldingsBody.innerHTML = '<tr><td colspan="6" class="empty-row" style="text-align:center;">현재 보유 중인 종목이 없습니다.</td></tr>';
+        } else {
+          holdings.forEach(t => {
+            const posBadge = t.position === 'Short' ? 'short' : (t.position === 'Long' ? 'long' : 'ticker');
+            const posText = t.position || '-';
+            const price = t.entryPrice ? formatCurrency(parseFloat(t.entryPrice)) : '-';
+            const qty = t.quantity ? formatCurrency(parseFloat(t.quantity)) : '-';
+            
+            notionHoldingsBody.innerHTML += `
+              <tr style="cursor:pointer;" onclick="openTradeModal('${t.id}')">
+                <td>${t.date.replace(/-/g, '/')}</td>
+                <td><span class="notion-badge ticker">${t.stockName}</span></td>
+                <td>${posText !== '-' ? `<span class="notion-badge ${posBadge}">${posText}</span>` : '-'}</td>
+                <td>${price}</td>
+                <td>${qty}</td>
+                <td><a href="javascript:void(0)" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;" onclick="event.stopPropagation(); openTradeModal('${t.id}')">매도 입력 ➔</a></td>
+              </tr>
+            `;
+          });
+        }
+      }
+
+      const notionTotalContainer = document.getElementById('notionTotalContainer');
+      if (notionTotalContainer) {
+        notionTotalContainer.innerHTML = '';
+        if (data.trades.length === 0) {
+          notionTotalContainer.innerHTML = '<div class="empty-row" style="text-align:center; padding: 2rem; color:var(--text-secondary);">기록된 매매가 없습니다.</div>';
+        } else {
+          const dateSet = new Set();
+          data.trades.forEach(t => {
+            if (t.date) dateSet.add(t.date);
+            if (t.exitDate) dateSet.add(t.exitDate);
+          });
+          data.dailyLogs.forEach(d => {
+            if (d.date) dateSet.add(d.date);
+          });
+          const sortedDates = Array.from(dateSet).sort((a,b) => new Date(b) - new Date(a));
+          
+          let html = '';
+          sortedDates.forEach(d => {
+            const dayTrades = data.trades.filter(t => t.date === d || t.exitDate === d);
+            const dailyLog = data.dailyLogs.find(log => log.date === d);
+            
+            let tradesHtml = '';
+            dayTrades.forEach(t => {
+               tradesHtml += renderNotionRow(t, false, true, d);
+            });
+            
+            const planText = dailyLog && dailyLog.plan ? dailyLog.plan : '기록 없음';
+            const summaryText = dailyLog && dailyLog.summary ? dailyLog.summary : '기록 없음';
+            
+            html += `
+              <details style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; margin-bottom: 0.5rem;" class="history-group">
+                <summary style="padding: 1rem; cursor: pointer; font-weight: bold; font-size: 1.1rem; list-style: none; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
+                  <span>🗓️ ${d.replace(/-/g, '/')}</span>
+                  <span style="font-size:0.9rem; color:var(--text-secondary); font-weight:normal;">매매 ${dayTrades.length}건</span>
+                </summary>
+                <div style="padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="background: var(--input-bg); padding: 1rem; border-radius: 6px;">
+                      <h4 style="color:#a5b4fc; margin-top:0; margin-bottom:0.5rem; font-size:0.95rem;">🌅 장 시작 전 계획</h4>
+                      <div style="font-size:0.9rem; color:var(--text-primary); white-space:pre-wrap;">${planText}</div>
+                    </div>
+                    <div style="background: var(--input-bg); padding: 1rem; border-radius: 6px;">
+                      <h4 style="color:#a5b4fc; margin-top:0; margin-bottom:0.5rem; font-size:0.95rem;">🌃 장 마감 후 복기</h4>
+                      <div style="font-size:0.9rem; color:var(--text-primary); white-space:pre-wrap;">${summaryText}</div>
+                    </div>
+                  </div>
+                  <div style="overflow-x:auto;">
+                    <table class="notion-table" style="width:100%; border-collapse:collapse; text-align:left;">
+                      <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+                          <th><span style="margin-right:5px; opacity:0.7;">🏷️</span> 종목명</th>
+                          <th><span style="margin-right:5px; opacity:0.7;">🧭</span> 포지션</th>
+                          <th><span style="margin-right:5px; opacity:0.7;">👍</span> 승</th>
+                          <th><span style="margin-right:5px; opacity:0.7;">🤝</span> 무</th>
+                          <th><span style="margin-right:5px; opacity:0.7;">👎</span> 패</th>
+                          <th><span style="margin-right:5px; opacity:0.7;">💰</span> 수익금</th>
+                          <th><span style="margin-right:5px; opacity:0.7;">📊</span> 상태</th>
+                          <th><span style="margin-right:5px; opacity:0.7;">📝</span> 매매 일지</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${tradesHtml}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
+            `;
+          });
+          notionTotalContainer.innerHTML = html;
+        }
+      }
+      
+      // Keep existing daily form population if a daily log exists for today
+      const todaysDaily = data.dailyLogs.find(d => d.date === currentToday);
+      if (todaysDaily) {
+        const pInput = document.getElementById('dailyPlan');
+        const sInput = document.getElementById('dailySummary');
+        if (pInput) pInput.value = todaysDaily.plan || '';
+        if (sInput) sInput.value = todaysDaily.summary || '';
+      } else {
+        const pInput = document.getElementById('dailyPlan');
+        const sInput = document.getElementById('dailySummary');
+        if (pInput) pInput.value = '';
+        if (sInput) sInput.value = '';
+      }
+    }
+
+    function renderNews(data) {
+      const list = document.getElementById('newsList');
+      list.innerHTML = '';
+      const sorted = [...data.news].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+      if(sorted.length===0) list.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">등록된 뉴스가 없습니다.</p>';
+      
+      const displayCount = 3;
+      sorted.slice(0, displayCount).forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'history-card';
+        card.innerHTML = `
+          <div class="history-header">
+            <span class="date-badge">📰 뉴스</span>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <span style="font-size: 0.85rem; color: var(--text-secondary);">${item.date}</span>
+              <button class="delete-btn" onclick="deleteItem('${item.id}', 'news')" title="삭제">✕</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <p><strong>이슈:</strong> ${item.title}</p>
+            ${item.link ? `<p><strong>링크:</strong> <a href="${item.link}" target="_blank" style="color:var(--accent-color);">${item.link}</a></p>` : ''}
+            <p><strong>코멘트:</strong> ${item.comment}</p>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      const moreBtn = document.getElementById('newsMoreBtn');
+      if (moreBtn) {
+        if (sorted.length > 0) {
+          moreBtn.style.display = 'block';
+          moreBtn.innerText = `더보기 (${sorted.length})`;
+        } else {
+          moreBtn.style.display = 'none';
+        }
+      }
+    }
+
+    function openNewsModal() {
+      const modal = document.getElementById('newsModal');
+      const modalList = document.getElementById('newsModalList');
+      if(!modal || !modalList) return;
+      
+      const data = getStorageData();
+      const sorted = [...data.news].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      modalList.innerHTML = '';
+      sorted.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'history-card';
+        card.innerHTML = `
+          <div class="history-header">
+            <span class="date-badge">📰 뉴스</span>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <span style="font-size: 0.85rem; color: var(--text-secondary);">${item.date}</span>
+              <button class="delete-btn" onclick="deleteItem('${item.id}', 'news'); openNewsModal();" title="삭제">✕</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <p><strong>이슈:</strong> ${item.title}</p>
+            ${item.link ? `<p><strong>링크:</strong> <a href="${item.link}" target="_blank" style="color:var(--accent-color);">${item.link}</a></p>` : ''}
+            <p><strong>코멘트:</strong> ${item.comment}</p>
+          </div>
+        `;
+        modalList.appendChild(card);
+      });
+      
+      modal.style.display = 'flex';
+    }
+
+    function closeNewsModal() {
+      const modal = document.getElementById('newsModal');
+      if(modal) modal.style.display = 'none';
+      renderAll();
+    }
+
+    function formatAnswers(text) {
+      if (!text) return '';
+      return text.replace(/(^-\s.*?:)/gm, '<span style="color: #9ca3af;">$1</span>');
+    }
+
+    function renderPeriods(data) {
+      // Setup Year Filter Options for Year and Quarter tabs
+      const yearFilterSelect = document.getElementById('yearFilter');
+      const currentYearFilter = yearFilterSelect ? yearFilterSelect.value : 'all';
+      
+      if (yearFilterSelect) {
+        const years = new Set(data.periodLogs.filter(p => p.periodType === 'year').map(p => p.date.substring(0,4)));
+        yearFilterSelect.innerHTML = '<option value="all" style="color:black;">연도 전체</option>';
+        Array.from(years).sort().reverse().forEach(y => {
+          const opt = document.createElement('option');
+          opt.value = y;
+          opt.innerText = `${y}년`;
+          opt.style.color = 'black';
+          if (y === currentYearFilter) opt.selected = true;
+          yearFilterSelect.appendChild(opt);
+        });
+      }
+
+      const quarterSearchInput = document.getElementById('quarterSearch');
+      const quarterSearchText = quarterSearchInput ? quarterSearchInput.value.toLowerCase().trim() : '';
+      const monthSearchInput = document.getElementById('monthSearch');
+      const monthSearchText = monthSearchInput ? monthSearchInput.value.toLowerCase().trim() : '';
+
+      ['week', 'month', 'quarter', 'year'].forEach(type => {
+        const list = document.getElementById(`${type}List`);
+        if (!list) return;
+        list.innerHTML = '';
+        
+        let filtered = data.periodLogs.filter(p => p.periodType === type).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        if (type === 'year' && currentYearFilter !== 'all') {
+          filtered = filtered.filter(p => p.date.startsWith(currentYearFilter));
+        }
+        if (type === 'quarter' && quarterSearchText !== '') {
+          filtered = filtered.filter(p => {
+            const stock = (p.stockName || '').toLowerCase();
+            const yearStr = (p.quarterYear || '').toString();
+            const qStr = (p.quarterQ || '').toString() + '분기';
+            return stock.includes(quarterSearchText) || 
+                   yearStr.includes(quarterSearchText) || 
+                   qStr.includes(quarterSearchText);
+          });
+        }
+        if (type === 'month' && monthSearchText !== '') {
+          filtered = filtered.filter(p => {
+            if (!p.date) return false;
+            let yy = '', mm = '';
+            if (p.date.includes('-') && p.date.indexOf('-') === 4) {
+              yy = p.date.substring(0, 4);
+              mm = p.date.substring(5, 7);
+            } else if (p.date.includes('-') && p.date.indexOf('-') === 2) {
+              yy = p.date.substring(3, 7);
+              mm = p.date.substring(0, 2);
+            }
+            const formatted = `${yy}년 ${mm}월`;
+            return formatted.includes(monthSearchText) || p.date.includes(monthSearchText);
+          });
+        }
+        
+        if(filtered.length===0) {
+          list.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">기록이 없습니다.</p>';
+          return;
+        }
+        
+        filtered.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'history-card';
+          
+          if (type === 'year') {
+            const ruleColor = item.ruleCheck === 'yes' ? '#34d399' : '#f87171';
+            const ruleBadge = `<span style="display:inline-block; padding:0.1rem 0.4rem; border-radius:4px; font-size:0.8rem; background:${ruleColor}33; color:${ruleColor}; font-weight:bold;">원칙 준수: ${item.ruleCheck ? item.ruleCheck.toUpperCase() : '-'}</span>`;
+            
+            const yearStr = item.date.substring(0,4);
+            const titleText = `${yearStr}년 연간 점검 및 내년도 계획`;
+
+            const formatColor = (val) => {
+              if (typeof val !== 'string') return val || '-';
+              if (val.startsWith('+')) return `<span style="color: #ef4444; font-weight:bold;">${val}</span>`;
+              if (val.startsWith('-')) return `<span style="color: #3b82f6; font-weight:bold;">${val}</span>`;
+              return val;
+            };
+
+            const formatProfitColor = (val) => {
+              if (typeof val !== 'string') return val || '-';
+              if (val.startsWith('-')) return `<span style="color: #3b82f6; font-weight:bold;">${val}</span>`;
+              const num = parseFloat(val.replace(/[^0-9.-]/g, ''));
+              if (isNaN(num) || num === 0) return val;
+              if (num > 0) return `<span style="color: #ef4444; font-weight:bold;">${val.startsWith('+') ? val : '+' + val}</span>`;
+              return val;
+            };
+
+            card.innerHTML = `
+              <div class="history-header" style="cursor:pointer;" onclick="const b = document.getElementById('year-body-${item.id}'); b.style.display = b.style.display === 'none' ? 'block' : 'none';">
+                <span style="font-weight:bold; font-size: 1.1rem; flex-grow:1; color:#fff;">📑 ${titleText}</span>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                  <span style="font-size: 0.85rem; color: var(--text-secondary);">${item.date}</span>
+                  <button class="edit-btn" onclick="event.stopPropagation(); editYearLog('${item.id}')" title="수정" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                  <button class="delete-btn" onclick="event.stopPropagation(); deleteItem('${item.id}', 'period')" title="삭제">✕</button>
+                </div>
+              </div>
+              <div class="card-body" id="year-body-${item.id}" style="display:none; margin-top:1rem;">
+                <div style="margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom:0.8rem;">
+                    <h4 style="color:#a5b4fc; margin: 0; font-size:1.05rem;">[올해 투자 점검]</h4>
+                    <div style="font-size: 0.95rem; font-weight: bold; background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: 4px;">
+                      총수익: ${formatProfitColor(item.yearProfitAmount)} <span style="margin:0 0.5rem; color:rgba(255,255,255,0.2);">|</span> 수익률: ${formatProfitColor(item.yearProfitRate)}
+                    </div>
+                  </div>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.5rem;">
+                    <p style="grid-column: 1 / -1;"><span style="color: #9ca3af;">올해 원금:</span> ${formatColor(item.yearPrincipalAmount || item.yearInvestedAmount)}</p>
+                  </div>
+                  <p style="margin-top:0.4rem; margin-bottom:0.4rem;">${ruleBadge}</p>
+                  <p style="font-size:0.95rem; color: #d1d5db; white-space: pre-line; margin-top: 0.5rem;"><span style="color: #9ca3af;">[잘한 점]</span><br/>${item.ruleGoodText || '-'}</p>
+                  ${item.ruleCheck === 'no' ? `<p style="font-size:0.95rem; color: #fca5a5; white-space: pre-line; margin-top:0.8rem;"><span style="color: #9ca3af;">[지켜지지 않은 원칙 및 혼동요인]</span><br/>${item.ruleBadText || '-'}</p>` : ''}
+                </div>
+                <div>
+                  <h4 style="color:#a5b4fc; margin-bottom:0.5rem; font-size:1.05rem;">[내년 투자 계획]</h4>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.8rem;">
+                    <p><span style="color: #9ca3af;">현재 자산:</span> <span>${formatColor(item.currentAsset)}</span></p>
+                    <p><span style="color: #9ca3af;">목표 자산:</span> <span>${formatColor(item.targetAsset)}</span></p>
+                  </div>
+                  <p><span style="color: #9ca3af;">매매 원칙 계획:</span><br/><span style="color: #d1d5db; white-space: pre-line;">${item.planPrinciples}</span></p>
+                </div>
+              </div>
+            `;
+          } else if (type === 'quarter') {
+            const yy = item.date.substring(2, 4);
+            const qStr = item.quarterQ || Math.ceil(parseInt(item.date.substring(5, 7), 10) / 3);
+            const cardTitle = `📑 ${yy}년도 ${qStr}분기 기업 실적 점검표`;
+            
+            const badgeImprove = item.improve === 'yes' ? '<span style="color:#34d399; font-weight:bold;">YES</span>' : '<span style="color:#f87171; font-weight:bold;">NO</span>';
+            const badgeOutlook = item.outlook === 'yes' ? '<span style="color:#34d399; font-weight:bold;">YES</span>' : '<span style="color:#f87171; font-weight:bold;">NO</span>';
+            
+            let brokerHtml = '';
+            if(item.brokerages && item.brokerages.length > 0) {
+              brokerHtml = `
+                <div style="margin-top:1.5rem;">
+                  <p><strong>(5) 증권사별 목표주가</strong></p>
+                  <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem; text-align: left; background: rgba(0,0,0,0.2); border-radius:6px; overflow:hidden;">
+                    <thead>
+                      <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <th style="padding: 0.5rem; font-weight: normal; color: var(--text-secondary);">증권사</th>
+                        <th style="padding: 0.5rem; font-weight: normal; color: var(--text-secondary);">목표주가</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${item.brokerages.map(b => {
+                        return `
+                          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.5rem;">${b.name}</td>
+                            <td style="padding: 0.5rem;">${b.price}</td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              `;
+            }
+
+            card.innerHTML = `
+              <div class="history-header" style="cursor:pointer;" onclick="const b = document.getElementById('q-body-${item.id}'); b.style.display = b.style.display === 'none' ? 'block' : 'none';">
+                <span style="font-weight:bold; font-size: 1.1rem; flex-grow:1; color:#fff;">${cardTitle} - <span style="color:var(--accent-color);">${item.stockName || '종목 미상'}</span></span>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                  <button class="edit-btn" onclick="event.stopPropagation(); editQuarterLog('${item.id}')" title="수정" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                  <button class="delete-btn" onclick="event.stopPropagation(); deleteItem('${item.id}', 'period')" title="삭제">✕</button>
+                </div>
+              </div>
+              <div class="card-body" id="q-body-${item.id}" style="display:none; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
+                <p><strong>(1) 매출 증가 이유</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.rev || '')}</span></p><br/>
+                <p><strong>(2) 영업이익 점검</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.op || '')}</span></p><br/>
+                <p><strong>(3) 잉여현금흐름(FCF)</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.fcf || '')}</span></p><br/>
+                <p><strong>(4) 자기자본이익률(ROE)</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.roe || '')}</span></p>
+                ${brokerHtml}
+                <div style="margin-top:1.5rem; padding:1rem; background:rgba(0,0,0,0.2); border-radius:6px; display:flex; justify-content:space-around;">
+                  <p style="margin:0;"><strong>실적이 개선되었나?</strong> ${badgeImprove}</p>
+                  <p style="margin:0;"><strong>전망이 유지되는가?</strong> ${badgeOutlook}</p>
+                </div>
+              </div>
+            `;
+          } else {
+            let cardTitle = '📝 기록';
+            let cardBody = '';
+            
+            if (type === 'month') {
+              let yyyy = '', mm = '';
+              if (item.date.includes('-') && item.date.indexOf('-') === 4) { // YYYY-MM
+                yyyy = item.date.substring(0, 4);
+                mm = item.date.substring(5, 7);
+              } else if (item.date.includes('-') && item.date.indexOf('-') === 2) { // MM-YYYY
+                mm = item.date.substring(0, 2);
+                yyyy = item.date.substring(3, 7);
+              } else {
+                mm = item.date.substring(0, 2);
+                yyyy = '20' + item.date.substring(2, 4);
+              }
+              cardTitle = `🗓️ ${yyyy}년 ${mm}월 월간 분석`;
+              
+              cardBody = `
+                <div class="card-body">
+                  <p><strong>[시장 흐름 분석]</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.market || '')}</span></p><br/>
+                  <p><strong>[섹터 흐름 분석]</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.sector || '')}</span></p><br/>
+                  <p><strong>[자산 배분 및 포트폴리오 점검]</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.portfolio || '')}</span></p><br/>
+                  <p><strong>[월간 점검]</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.review || '')}</span></p>
+                </div>
+              `;
+            } else if (type === 'week') {
+              cardTitle = `📅 ${getWeekOfMonthStr(item.date)}`;
+              
+              let calendarHtml = `<div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:1rem; text-align:center;">`;
+              const dayNames = ['월','화','수','목','금','토','일'];
+              dayNames.forEach(d => {
+                calendarHtml += `<div style="font-size:0.8rem; color:var(--text-secondary); padding:2px;">${d}</div>`;
+              });
+              
+              const targetDate = new Date(item.date);
+              const dayOfWeek = targetDate.getDay();
+              const diffToMonday = targetDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+              const monday = new Date(targetDate);
+              monday.setDate(diffToMonday);
+              
+              for (let i = 0; i < 7; i++) {
+                const currentDay = new Date(monday);
+                currentDay.setDate(monday.getDate() + i);
+                
+                const yyyy = currentDay.getFullYear();
+                const mm = String(currentDay.getMonth() + 1).padStart(2, '0');
+                const dd = String(currentDay.getDate()).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+                
+                const dayTrades = data.trades.filter(t => t.date === dateStr);
+                let dayProfit = 0;
+                dayTrades.forEach(t => {
+                  if (t.profitAmount) dayProfit += t.profitAmount;
+                });
+                
+                let profitHtml = '<div style="height:14px; margin-top:2px;"></div>'; // placeholder
+                if (dayProfit > 0) {
+                  profitHtml = `<div style="color:#ef4444; font-size:0.75rem; font-weight:bold; margin-top:2px;">+${dayProfit.toLocaleString()}</div>`;
+                } else if (dayProfit < 0) {
+                  profitHtml = `<div style="color:#3b82f6; font-size:0.75rem; font-weight:bold; margin-top:2px;">${dayProfit.toLocaleString()}</div>`;
+                } else if (dayTrades.length > 0) {
+                  profitHtml = `<div style="color:var(--text-secondary); font-size:0.75rem; font-weight:bold; margin-top:2px;">0</div>`;
+                }
+                
+                const isTarget = (dateStr === item.date) ? 'border: 1px solid var(--accent-color);' : 'border: 1px solid var(--panel-border);';
+                const bg = (dateStr === item.date) ? 'background: rgba(99,102,241,0.1);' : 'background: rgba(255,255,255,0.02);';
+                const isWeekend = (i === 5 || i === 6) ? 'opacity: 0.7;' : '';
+                
+                calendarHtml += `
+                  <div style="padding: 0.4rem 2px; border-radius: 6px; ${isTarget} ${bg} ${isWeekend}">
+                    <div style="font-size:0.9rem; color:var(--text-primary);">${currentDay.getDate()}</div>
+                    ${profitHtml}
+                  </div>
+                `;
+              }
+              calendarHtml += `</div>`;
+
+              // item.plan, item.summary fallback for old records
+              cardBody = `
+                <div class="card-body">
+                  ${calendarHtml}
+                  <p><strong>[이번 주 성과에 대한 이유 분석]</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.reason || item.plan || '')}</span></p><br/>
+                  <p><strong>[잘한 점 / 아쉬운 점 정리]</strong><br/><span style="white-space: pre-line;">${formatAnswers(item.feedback || item.summary || '')}</span></p>
+                </div>
+              `;
+            }
+
+            card.innerHTML = `
+              <div class="history-header" style="cursor:pointer;" onclick="const b = document.getElementById('period-body-${item.id}'); b.style.display = b.style.display === 'none' ? 'block' : 'none';">
+                <span style="font-weight:bold; font-size: 1.1rem; flex-grow:1; color:#fff;">${cardTitle}</span>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                  ${type === 'month' ? `<button class="edit-btn" onclick="event.stopPropagation(); editMonthLog('${item.id}')" title="수정" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>` : ''}
+                  ${type === 'week' ? `<button class="edit-btn" onclick="event.stopPropagation(); editWeekLog('${item.id}')" title="수정" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>` : ''}
+                  <button class="delete-btn" onclick="event.stopPropagation(); deleteItem('${item.id}', 'period')" title="삭제">✕</button>
+                </div>
+              </div>
+              <div id="period-body-${item.id}" style="display:none; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
+                ${cardBody}
+              </div>
+            `;
+          }
+          list.appendChild(card);
+        });
+      });
+    }
+
+    function renderSites(data) {
+      const favGrid = document.getElementById('favoriteSiteGrid');
+      const recGrid = document.getElementById('siteGrid');
+      favGrid.innerHTML = '';
+      recGrid.innerHTML = '';
+      
+      const favorites = data.sites.filter(s => s.isFavorite);
+      // 추천 사이트 모음은 즐겨찾기 등록 여부와 상관없이 항상 모두 표시 (seed- 로 시작하는 것들)
+      const recommended = data.sites.filter(s => s.id.startsWith('seed-'));
+
+      // Render Favorites
+      if (favorites.length === 0) {
+        favGrid.innerHTML = '<p style="color: var(--text-secondary); padding: 1rem 0; grid-column: 1/-1;">등록된 즐겨찾기가 없습니다. 아래 추천 사이트에서 별(☆)을 클릭하거나 직접 추가해보세요.</p>';
+      } else {
+        favorites.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'site-card';
+          div.style.cursor = 'default';
+          div.style.position = 'relative';
+          
+          const displayTitle = item.customTitle || item.title;
+          const displayDesc = item.customDesc || item.desc;
+
+          let badgesHtml = '';
+          if (item.market && item.market.length > 0) {
+            if (item.market.includes('KR')) badgesHtml += '<span style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 6px;">국장</span>';
+            if (item.market.includes('US')) badgesHtml += '<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 6px;">미장</span>';
+          }
+
+          div.innerHTML = `
+            <div id="view-mode-${item.id}">
+              <h3 style="display:flex; align-items:center;"><a href="${item.url}" target="_blank" style="color: inherit; text-decoration: none;">${displayTitle}</a> ${badgesHtml}</h3>
+              <p>${displayDesc}</p>
+              <button class="delete-btn site-delete" onclick="deleteItem('${item.id}', 'site')" title="삭제" style="right: 2.5rem;">✕</button>
+              <button onclick="editSite('${item.id}')" style="position: absolute; top: 1rem; right: 4.5rem; background: none; border: none; font-size: 1.1rem; color: var(--text-secondary); cursor: pointer;" title="수정">✏️</button>
+              <button onclick="toggleFavoriteSite('${item.id}')" style="position: absolute; bottom: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: #fbbf24; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="즐겨찾기 해제">★</button>
+            </div>
+            <div id="edit-mode-${item.id}" style="display: none; padding-bottom: 2rem;">
+              <input type="text" id="edit-title-${item.id}" value="${displayTitle}" style="margin-bottom: 0.5rem;">
+              <textarea id="edit-desc-${item.id}" style="margin-bottom: 0.5rem; min-height: 60px;">${displayDesc}</textarea>
+              <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button onclick="saveEditSite('${item.id}')" style="padding: 0.4rem 0.8rem; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer;">저장</button>
+                <button onclick="cancelEditSite('${item.id}')" style="padding: 0.4rem 0.8rem; background: #4b5563; color: white; border: none; border-radius: 4px; cursor: pointer;">취소</button>
+              </div>
+            </div>
+          `;
+          favGrid.appendChild(div);
+        });
+      }
+
+      // Render Recommended
+      if (recommended.length === 0) {
+        recGrid.innerHTML = '<p style="color: var(--text-secondary); padding: 1rem 0; grid-column: 1/-1;">추천 사이트가 없습니다.</p>';
+        return;
+      }
+
+      const categories = {};
+      recommended.forEach(item => {
+        const cat = item.category || '기타';
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push(item);
+      });
+      
+      const catOrder = ["거장 포트폴리오", "기업 분석", "경제흐름", "경제 사이트", "기타"];
+      
+      catOrder.forEach(cat => {
+        if (!categories[cat] || categories[cat].length === 0) return;
+        
+        const catTitle = document.createElement('h3');
+        catTitle.style.color = '#a5b4fc';
+        catTitle.style.marginTop = '1.5rem';
+        catTitle.style.marginBottom = '0.5rem';
+        catTitle.style.fontSize = '1.1rem';
+        catTitle.style.gridColumn = '1 / -1';
+        catTitle.innerText = `📂 ${cat}`;
+        recGrid.appendChild(catTitle);
+        
+        categories[cat].forEach(item => {
+          const isFav = item.isFavorite;
+          const starIcon = isFav ? '★' : '☆';
+          const starColor = isFav ? '#fbbf24' : 'var(--text-secondary)';
+          const starTitle = isFav ? '즐겨찾기 해제' : '즐겨찾기 추가';
+
+          const div = document.createElement('div');
+          div.className = 'site-card';
+          div.style.cursor = 'default';
+          div.style.position = 'relative';
+
+          let badgesHtml = '';
+          if (item.market && item.market.length > 0) {
+            if (item.market.includes('KR')) badgesHtml += '<span style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 6px;">국장</span>';
+            if (item.market.includes('US')) badgesHtml += '<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 6px;">미장</span>';
+          }
+
+          div.innerHTML = `
+            <h3 style="display:flex; align-items:center;"><a href="${item.url}" target="_blank" style="color: inherit; text-decoration: none;">${item.title}</a> ${badgesHtml}</h3>
+            <p>${item.desc}</p>
+            <button onclick="toggleFavoriteSite('${item.id}')" style="position: absolute; bottom: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: ${starColor}; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="${starTitle}">${starIcon}</button>
+          `;
+          recGrid.appendChild(div);
+        });
+      });
+    }
+
+    // Start App
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('year-target-year').value = new Date().getFullYear();
+      document.getElementById('quarterYear').value = new Date().getFullYear();
+      document.getElementById('quarterQ').value = Math.ceil((new Date().getMonth()+1)/3);
+    });
+    renderAll();
+  </script>
+</body>
+</html>
