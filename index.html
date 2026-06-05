@@ -224,6 +224,19 @@
     .notion-checkbox { width: 16px; height: 16px; display: inline-block; border: 2px solid var(--text-secondary); border-radius: 3px; vertical-align: middle; position:relative; }
     .notion-checkbox.checked { background: var(--accent-color); border-color: var(--accent-color); }
     .notion-checkbox.checked::after { content: '✓'; position:absolute; top:-2px; left:2px; color:white; font-size: 12px; font-weight:bold; }
+    @media (max-width: 768px) {
+      .container-main { grid-template-columns: 1fr !important; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
+      .stats-grid { grid-template-columns: 1fr !important; }
+      #assetStatsGrid { grid-template-columns: 1fr 1fr !important; }
+      div[style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: 1fr 1fr !important; }
+      div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+      .modal-content { width: 95%; padding: 1.5rem; margin: 10% auto; }
+      .nav-container { flex-direction: column; gap: 0.5rem; }
+      .sub-nav { overflow-x: auto; white-space: nowrap; justify-content: flex-start; }
+      .sub-nav-btn { flex: 0 0 auto; }
+      .site-grid { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 <body>
