@@ -292,6 +292,20 @@
         overflow-y: auto;
       }
 
+      /* Tabs Scrollable on Mobile */
+      .tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        justify-content: flex-start !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab {
+        flex: 0 0 auto;
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.9rem !important;
+      }
+
       /* Card UI for Tables */
       table { border: none !important; }
       thead { display: none; }
@@ -363,7 +377,7 @@
       <button class="nav-btn active" onclick="switchMainTab('news')" id="nav-news">뉴스·일정</button>
       <button class="nav-btn" onclick="switchMainTab('journal')" id="nav-journal">매매일지</button>
       <button class="nav-btn" onclick="switchMainTab('calculator')" id="nav-calculator">고정손실 계산기</button>
-      <button class="nav-btn" onclick="switchMainTab('site')" id="nav-site">즐겨찾기</button>
+      <button class="nav-btn" onclick="switchMainTab('site')" id="nav-site">관련사이트</button>
       <button class="nav-btn" onclick="handleSignOut()" style="color: var(--danger-color); margin-left: auto;">로그아웃</button>
     </div>
   </nav>
