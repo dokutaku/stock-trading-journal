@@ -2,7 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f1115">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>주식 매매 일지 | Open Design</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="daily_briefing.js"></script>
@@ -225,31 +228,115 @@
     .notion-checkbox { width: 16px; height: 16px; display: inline-block; border: 2px solid var(--text-secondary); border-radius: 3px; vertical-align: middle; position:relative; }
     .notion-checkbox.checked { background: var(--accent-color); border-color: var(--accent-color); }
     .notion-checkbox.checked::after { content: '✓'; position:absolute; top:-2px; left:2px; color:white; font-size: 12px; font-weight:bold; }
+    /* Fab Button */
+    .fab-btn {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: var(--accent-color);
+      color: white;
+      font-size: 24px;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
     @media (max-width: 768px) {
+      /* Bottom Navigation */
+      .top-nav {
+        top: auto;
+        bottom: 0;
+        border-bottom: none;
+        border-top: 1px solid var(--panel-border);
+        padding: 0;
+      }
+      .nav-container {
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 0.5rem;
+        gap: 0;
+      }
+      .logo { display: none; }
+      .nav-btn {
+        flex: 1;
+        font-size: 0.8rem;
+        padding: 0.5rem;
+        text-align: center;
+      }
+      .main-content { padding-bottom: 80px; }
+      
       .container-main { grid-template-columns: 1fr !important; }
       .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
       .stats-grid { grid-template-columns: 1fr !important; }
       #assetStatsGrid { grid-template-columns: 1fr 1fr !important; }
       div[style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: 1fr 1fr !important; }
       div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
-      .modal-content { width: 95%; padding: 1.5rem; margin: 10% auto; }
-      .nav-container { flex-direction: column; gap: 0.5rem; }
-      .sub-nav { overflow-x: auto; white-space: nowrap; justify-content: flex-start; }
-      .sub-nav-btn { flex: 0 0 auto; }
       .site-grid { grid-template-columns: 1fr !important; }
+      
+      /* FAB Display */
+      .fab-btn { display: flex; }
+      
+      /* Full Screen Modal */
+      .modal-content {
+        width: 100% !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        overflow-y: auto;
+      }
+
+      /* Card UI for Tables */
+      table { border: none !important; }
+      thead { display: none; }
+      tbody tr {
+        display: flex;
+        flex-direction: column;
+        background: rgba(25, 28, 35, 0.7);
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+      }
+      tbody tr:hover { background: rgba(35, 38, 45, 0.7); }
+      tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 0.95rem;
+        text-align: right;
+      }
+      tbody td:last-child { border-bottom: none; }
+      tbody td::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-right: 1rem;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- Floating Action Button for Mobile -->
+  <button class="fab-btn" onclick="openTradeModal()">+</button>
+
   <!-- Top Navigation -->
   <nav class="top-nav">
     <div class="nav-container">
       <div class="logo">📈 Journal</div>
-      <button class="nav-btn active" onclick="switchMainTab('news')" id="nav-news">오늘 뉴스</button>
+      <button class="nav-btn active" onclick="switchMainTab('news')" id="nav-news">뉴스·일정</button>
       <button class="nav-btn" onclick="switchMainTab('journal')" id="nav-journal">매매일지</button>
-      <button class="nav-btn" onclick="switchMainTab('calculator')" id="nav-calculator">고정 손실 계산기</button>
-      <button class="nav-btn" onclick="switchMainTab('site')" id="nav-site">관련 사이트</button>
+      <button class="nav-btn" onclick="switchMainTab('calculator')" id="nav-calculator">고정손실 계산기</button>
+      <button class="nav-btn" onclick="switchMainTab('site')" id="nav-site">즐겨찾기</button>
     </div>
   </nav>
 
@@ -2355,7 +2442,7 @@
         else if (t.position === 'Long') { posBadge = 'long'; posText = 'Long'; }
         else { posBadge = 'ticker'; posText = '-'; }
 
-        const dateTd = includeDate ? `<td>${t.date.replace(/-/g, '/')}</td>` : '';
+        const dateTd = includeDate ? `<td data-label="매매 일자">${t.date.replace(/-/g, '/')}</td>` : '';
         
         let statusTd = '';
         if (includeStatus) {
@@ -2369,7 +2456,7 @@
           if (statusStr === '매도') statusColor = 'rgba(59,130,246,0.2)';
           if (statusStr === '매수/매도') statusColor = 'rgba(168,85,247,0.2)';
           
-          statusTd = `<td><span class="notion-badge ticker" style="background:${statusColor};">${statusStr}</span></td>`;
+          statusTd = `<td data-label="상태"><span class="notion-badge ticker" style="background:${statusColor};">${statusStr}</span></td>`;
         }
 
         const assetShort = t.asset === '국장' ? '국' : (t.asset === '미장' ? '미' : (t.asset === '코인' ? '코' : (t.asset === '기타' ? '기' : '미')));
@@ -2379,15 +2466,15 @@
         return `
           <tr style="cursor:pointer;" onclick="openTradeModal('${t.id}')">
             ${dateTd}
-            <td>${assetHtml}<span class="notion-badge ticker">${t.stockName}</span></td>
-            <td>${posText !== '-' ? `<span class="notion-badge ${posBadge}">${posText}</span>` : '-'}</td>
-            <td><div class="notion-checkbox ${isWin ? 'checked' : ''}"></div></td>
-            <td><div class="notion-checkbox ${isTie ? 'checked' : ''}"></div></td>
-            <td><div class="notion-checkbox ${isLoss ? 'checked' : ''}"></div></td>
-            <td>${profitStr}</td>
+            <td data-label="종목명">${assetHtml}<span class="notion-badge ticker">${t.stockName}</span></td>
+            <td data-label="포지션">${posText !== '-' ? `<span class="notion-badge ${posBadge}">${posText}</span>` : '-'}</td>
+            <td data-label="승"><div class="notion-checkbox ${isWin ? 'checked' : ''}"></div></td>
+            <td data-label="무"><div class="notion-checkbox ${isTie ? 'checked' : ''}"></div></td>
+            <td data-label="패"><div class="notion-checkbox ${isLoss ? 'checked' : ''}"></div></td>
+            <td data-label="수익금">${profitStr}</td>
             ${statusTd}
-            <td><a href="javascript:void(0)" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;" onclick="event.stopPropagation(); openTradeModal('${t.id}')">➔ 클릭</a></td>
-            <td style="text-align:center;"><button onclick="event.stopPropagation(); deleteItem('${t.id}', 'trade');" style="background:none; border:none; cursor:pointer; font-size:0.85rem; color:var(--danger-color);" title="삭제">❌</button></td>
+            <td data-label="매매 복기"><a href="javascript:void(0)" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;" onclick="event.stopPropagation(); openTradeModal('${t.id}')">➔ 클릭</a></td>
+            <td data-label="삭제" style="text-align:center;"><button onclick="event.stopPropagation(); deleteItem('${t.id}', 'trade');" style="background:none; border:none; cursor:pointer; font-size:0.85rem; color:var(--danger-color);" title="삭제">❌</button></td>
           </tr>
         `;
       };
@@ -2424,12 +2511,12 @@
             
             notionHoldingsBody.innerHTML += `
               <tr style="cursor:pointer;" onclick="openTradeModal('${t.id}')">
-                <td>${t.date.replace(/-/g, '/')}</td>
-                <td>${assetHtml}<span class="notion-badge ticker">${t.stockName}</span></td>
-                <td>${posText !== '-' ? `<span class="notion-badge ${posBadge}">${posText}</span>` : '-'}</td>
-                <td>${price}</td>
-                <td>${qty}</td>
-                <td><a href="javascript:void(0)" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;" onclick="event.stopPropagation(); openTradeModal('${t.id}')">매도 입력 ➔</a></td>
+                <td data-label="진입 날짜">${t.date.replace(/-/g, '/')}</td>
+                <td data-label="종목명">${assetHtml}<span class="notion-badge ticker">${t.stockName}</span></td>
+                <td data-label="포지션">${posText !== '-' ? `<span class="notion-badge ${posBadge}">${posText}</span>` : '-'}</td>
+                <td data-label="진입가">${price}</td>
+                <td data-label="수량">${qty}</td>
+                <td data-label="매도 입력"><a href="javascript:void(0)" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;" onclick="event.stopPropagation(); openTradeModal('${t.id}')">매도 입력 ➔</a></td>
               </tr>
             `;
           });
