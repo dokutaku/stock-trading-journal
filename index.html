@@ -973,9 +973,16 @@
 
     const SUPABASE_URL = 'https://ffkcmuznxqmtibmxfwmh.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZma2NtdXpueHFtdGlibXhmd21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3OTA3NDEsImV4cCI6MjA5NjM2Njc0MX0.j09NZu5d4CSR-1NdxFMn7AaEX_gGtNDCLwi8y57TaAI';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    let supabaseClient = null;
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } else {
+      console.warn("Supabase CDN failed to load. Running in local-only mode.");
+    }
 
     async function fetchFromSupabase() {
+      if (!supabaseClient) return null;
       try {
         const { data, error } = await supabaseClient
           .from('app_data')
@@ -993,6 +1000,7 @@
     }
 
     async function pushToSupabase(jsonData) {
+      if (!supabaseClient) return;
       try {
         const { error } = await supabaseClient
           .from('app_data')
