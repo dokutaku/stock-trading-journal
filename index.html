@@ -972,7 +972,7 @@
     ].map((s, i) => ({ ...s, id: 'seed-' + i, type: 'site', isFavorite: false, createdAt: new Date().toISOString() }));
 
     const SUPABASE_URL = 'https://ffkcmuznxqmtibmxfwmh.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_XU8LI5qzzkPTEiOS95LJnQ_wnao2kgq';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZma2NtdXpueHFtdGlibXhmd21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3OTA3NDEsImV4cCI6MjA5NjM2Njc0MX0.j09NZu5d4CSR-1NdxFMn7AaEX_gGtNDCLwi8y57TaAI';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function fetchFromSupabase() {
