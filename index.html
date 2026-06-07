@@ -1019,6 +1019,8 @@
       if (data) {
          try {
            const parsed = JSON.parse(data);
+           if(!parsed.dailyLogs) parsed.dailyLogs = [];
+           if(!parsed.trades) parsed.trades = [];
            if(!parsed.news) parsed.news = [];
            if(!parsed.periodLogs) parsed.periodLogs = [];
            if(!parsed.sites) parsed.sites = [];
