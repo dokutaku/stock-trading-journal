@@ -476,8 +476,7 @@
         <button class="nav-btn" onclick="switchMainTab('calculator')" id="nav-calculator">고정손실 계산기</button>
         <button class="nav-btn" onclick="switchMainTab('site')" id="nav-site">관련사이트</button>
       </div>
-      <button class="nav-btn" onclick="handleSignOut()" style="color: var(--danger-color); margin-left: auto;">로그아웃</button>
-      <button class="nav-btn" onclick="openSettingsModal()" style="font-size: 1.2rem; margin-left: 10px;" title="설정">⚙️</button>
+      <button class="nav-btn" onclick="openSettingsModal()" style="font-size: 1.2rem; margin-left: auto;" title="설정">⚙️</button>
     </div>
   </nav>
 
@@ -513,6 +512,10 @@
         </button>
 
 
+        <!-- 5. 로그아웃 -->
+        <button class="btn" onclick="handleSignOut()" style="text-align: left; display: flex; align-items: center; gap: 10px;">
+          <span>🚪</span> 로그아웃
+        </button>
 
         <!-- 6. 회원 탈퇴 -->
         <button class="btn" onclick="deleteAccount()" style="text-align: left; display: flex; align-items: center; gap: 10px; color: var(--danger-color); border: 1px solid var(--danger-color); margin-top: 10px;">
