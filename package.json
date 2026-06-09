@@ -4,15 +4,12 @@
   "description": "Stock Trading Journal",
   "main": "index.html",
   "scripts": {
-    "start": "serve -l 3000",
-    "stagewise": "concurrently \"serve -l 3000\" \"stagewise --app-port 3000 -s -b\""
+    "start": "serve -l 3000"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^10.0.3",
-    "serve": "^14.2.6",
-    "stagewise": "^0.11.1"
+    "serve": "^14.2.6"
   }
 }
