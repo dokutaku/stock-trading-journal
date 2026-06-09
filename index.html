@@ -375,10 +375,37 @@
        .modal-content { width: 100%; max-width: 100%; max-height: 85vh; border-radius: 24px 24px 0 0; margin: 0; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); border-bottom: none; }
        .top-nav { padding: 0 0.5rem; }
        #journal-subnav-wrapper .tabs {
-         -webkit-mask-image: linear-gradient(to left, transparent 0%, black 15%);
-         mask-image: linear-gradient(to left, transparent 0%, black 15%);
          padding-right: 2rem;
        }
+     }
+
+     /* Subnav scroll hint arrow */
+     #journal-subnav-wrapper::after {
+        content: '〉';
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        background: linear-gradient(90deg, transparent, rgba(0,0,0,0.95) 50%);
+        color: rgba(255,255,255,0.9);
+        font-weight: 900;
+        font-size: 1.2rem;
+        pointer-events: none;
+        border-radius: 0 12px 12px 0;
+        transition: opacity 0.3s;
+        animation: bounce-horizontal 1.5s infinite;
+     }
+     #journal-subnav-wrapper.scrolled-end::after {
+        opacity: 0;
+        animation: none;
+     }
+     @keyframes bounce-horizontal {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(4px); }
      }
 
   </style>
@@ -3456,6 +3483,22 @@
       document.getElementById('year-target-year').value = new Date().getFullYear();
       document.getElementById('quarterYear').value = new Date().getFullYear();
       document.getElementById('quarterQ').value = Math.ceil((new Date().getMonth()+1)/3);
+
+      // Scroll hint logic for journal subnav
+      const journalTabs = document.querySelector('#journal-subnav-wrapper .tabs');
+      if (journalTabs) {
+        const checkScroll = () => {
+          const wrapper = document.getElementById('journal-subnav-wrapper');
+          if (journalTabs.scrollLeft + journalTabs.clientWidth >= journalTabs.scrollWidth - 10) {
+            wrapper.classList.add('scrolled-end');
+          } else {
+            wrapper.classList.remove('scrolled-end');
+          }
+        };
+        journalTabs.addEventListener('scroll', checkScroll);
+        window.addEventListener('resize', checkScroll);
+        setTimeout(checkScroll, 500);
+      }
       
       if (supabaseClient) {
         checkAuthSession();
