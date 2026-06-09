@@ -485,35 +485,10 @@
         <button class="close-btn" onclick="closeSettingsModal()">×</button>
       </div>
       <div class="modal-body" style="display: flex; flex-direction: column; gap: 15px;">
+        <!-- 1. 계정 정보 -->
         <div style="background: rgba(128,128,128,0.1); padding: 1rem; border-radius: 8px;">
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">현재 로그인 계정</p>
           <p id="settingsUserEmail" style="font-weight: 600; color: var(--text-primary);">-</p>
-        </div>
-
-        <!-- 2. AI 모닝 브리핑 설정 -->
-        <div style="background: rgba(99, 102, 241, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3);">
-          <h4 style="color: #a5b4fc; margin-bottom: 10px; font-size: 0.95rem;">🤖 AI 브리핑 설정</h4>
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label style="font-size: 0.75rem;">현재 시드머니 (원)</label>
-            <input type="number" id="settingSeedMoney" placeholder="예: 50000000" style="padding: 0.6rem; font-size: 0.9rem;">
-          </div>
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label style="font-size: 0.75rem;">올해 목표 금액 (원)</label>
-            <input type="number" id="settingTargetMoney" placeholder="예: 100000000" style="padding: 0.6rem; font-size: 0.9rem;">
-          </div>
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label style="font-size: 0.75rem;">Naver Client ID</label>
-            <input type="text" id="settingNaverId" placeholder="네이버 개발자 센터 발급" style="padding: 0.6rem; font-size: 0.9rem;">
-          </div>
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label style="font-size: 0.75rem;">Naver Client Secret</label>
-            <input type="password" id="settingNaverSecret" placeholder="네이버 개발자 센터 발급" style="padding: 0.6rem; font-size: 0.9rem;">
-          </div>
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label style="font-size: 0.75rem;">OpenAI API Key</label>
-            <input type="password" id="settingOpenAiKey" placeholder="sk-..." style="padding: 0.6rem; font-size: 0.9rem;">
-          </div>
-          <button class="btn" onclick="saveAISettings()" style="padding: 0.6rem; font-size: 0.9rem;">설정 저장하기</button>
         </div>
         
         <!-- 3. 데이터 내보내기 -->
@@ -549,14 +524,7 @@
   <!-- 1. 오늘 뉴스 탭 -->
   <div id="main-news" class="main-content active">
     <div class="container">
-      <!-- Briefing Dashboard -->
-      <div class="glass-panel" style="margin-bottom: 0; padding-right: 0.5rem;">
-        <h2 class="section-title" style="margin-top: 0;">🌅 오늘의 AI 모닝 브리핑</h2>
-        <div id="dailyBriefingContent" style="max-height: 750px; overflow-y: auto; padding-right: 1rem;">
-          <p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">데이터를 불러오는 중입니다...</p>
-        </div>
-      </div>
-      
+
       <!-- Manual Scraping Form -->
       <div>
         <div class="glass-panel" style="margin-bottom: 1.5rem;">
