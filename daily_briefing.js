@@ -1,61 +1,208 @@
-const DAILY_BRIEFING = {
-  exchangeRate: { value: "1,515.15", change: "0.00" },
-  treasuryYield: { value: "4.450%", change: "0.000%p" },
-  strategy: "AI 수요 강세와 코스피 랠리에 힘입어 반도체 섹터에 집중하는 한편, 인플레이션과 하반기 한국은행의 금리 인상 가능성을 주시해야 합니다. 부동산의 경우 공급 부족과 선별적 회복세를 고려하여 서울 핵심 지역의 우량 자산을 공략하는 것이 유효합니다.",
+// daily_briefing.js
+const FALLBACK_BRIEFING = {
+  exchangeRate: { value: "1,385.15", change: "0.00" },
+  treasuryYield: { value: "4.250%", change: "0.000%p" },
+  strategy: "데이터를 불러오지 못했습니다. 설정(우측 상단 톱니바퀴)에서 API 키를 입력해주세요. 현재는 임시 데이터입니다.\n시드머니와 목표금액을 설정하시면 맞춤형 전략이 제공됩니다.",
   realEstateNews: [
-    {
-      title: "서울 아파트값 67주 연속 상승세 기록",
-      link: "https://busan.fnnews.com/news/202605251909283162",
-      summary: "서울 아파트 매매가격이 지속적으로 상승하며 67주째 오름세를 이어가고 있습니다."
-    },
-    {
-      title: "다주택자 양도세 중과 한시 배제 종료 임박에 매물 회수",
-      link: "https://search.naver.com/search.naver?where=news&query=%EB%8B%A4%EC%A3%BC%ED%83%9D%EC%9E%90+%EC%96%91%EB%8F%84%EC%84%B8+%EC%A4%91%EA%B3%BC+%ED%95%9C%EC%8B%9C+%EB%B0%B0%EC%A0%9C+%EC%A2%85%EB%A3%8C+%EC%9E%84%EB%B0%95%EC%97%90+%EB%A7%A4%EB%AC%BC+%ED%9A%8C%EC%88%98",
-      summary: "양도세 중과 유예 조치 종료를 앞두고 다주택자들이 매물을 거둬들이면서 공급 물량이 감소하고 있습니다."
-    },
-    {
-      title: "정부, 토지거래허가구역 지정으로 수요 억제 및 균형 시도",
-      link: "https://search.naver.com/search.naver?where=news&query=%ED%86%A0%EC%A7%80%EA%B1%B0%EB%9E%98%ED%97%88%EA%B0%80%EA%B5%AC%EC%97%AD+%EC%A7%80%EC%A0%95%EC%9C%BC%EB%A1%9C+%EC%88%98%EC%9A%94+%EC%96%B5%EC%A0%9C+%EB%B0%8F+%EA%B7%A0%ED%98%95+%EC%8B%9C%EB%8F%84",
-      summary: "부동산 시장 과열을 막기 위해 정부가 토지거래허가구역을 추가 지정하여 수요 억제에 나섰습니다."
-    }
+    { title: "[임시] 서울 아파트값 67주 연속 상승세", link: "#", summary: "API 연동 전 임시 데이터입니다." },
+    { title: "[임시] 다주택자 매물 회수", link: "#", summary: "API 연동 전 임시 데이터입니다." }
   ],
   financeNews: [
-    {
-      title: "코스피 5월 28.45% 급등, 8,476.15로 사상 최고치 경신",
-      link: "https://search.naver.com/search.naver?where=news&query=%EC%BD%94%EC%8A%A4%ED%94%BC+5%EC%9B%94+28.45%25+%EA%B8%89%EB%93%B1%2C+8%2C476.15%EB%A1%9C+%EC%82%AC%EC%83%81+%EC%B5%9C%EA%B3%A0%EC%B9%98+%EA%B2%BD%EC%8B%A0",
-      summary: "외국인 매수세와 반도체 강세에 힘입어 코스피가 사상 최고치를 경신했습니다."
-    },
-    {
-      title: "한국은행, 2026년 경제성장률 전망치 2.6%로 상향",
-      link: "https://search.naver.com/search.naver?where=news&query=%ED%95%9C%EA%B5%AD%EC%9D%80%ED%96%89%2C+2026%EB%85%84+%EA%B2%BD%EC%A0%9C%EC%84%B1%EC%9E%A5%EB%A5%A0+%EC%A0%84%EB%A7%9D%EC%B9%98+2.6%25%EB%A1%9C+%EC%83%81%ED%96%A5",
-      summary: "수출 호조와 내수 회복 기대감을 반영하여 한국은행이 경제성장률 전망치를 상향 조정했습니다."
-    },
-    {
-      title: "코스피 랠리 속 외국인 투자자 44조 7,100억 원 순매도",
-      link: "https://search.naver.com/search.naver?where=news&query=%EC%BD%94%EC%8A%A4%ED%94%BC+%EB%9E%A4%EB%A6%AC+%EC%86%8D+%EC%99%B8%EA%B5%AD%EC%9D%B8+%ED%88%AC%EC%9E%90%EC%9E%90+44%EC%A1%B0+7%2C100%EC%96%B5+%EC%9B%90+%EC%88%9C%EB%A7%A4%EB%8F%84",
-      summary: "지수 최고치 경신에도 불구하고 외국인 투자자들의 대규모 차익 실현 매물이 쏟아졌습니다."
-    }
-  ],
-  stockNews: [
-    {
-      title: "삼성전자, 창사 이래 첫 노사 임금협약 체결",
-      link: "https://search.naver.com/search.naver?where=news&query=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90%2C+%EC%B0%BD%EC%82%AC+%EC%9D%B4%EB%9E%98+%EC%B2%AB+%EB%85%B8%EC%82%AC+%EC%9E%84%EA%B8%88%ED%98%91%EC%95%BD+%EC%B2%B4%EA%B2%B0",
-      summary: "삼성전자가 노조와 2026년 임금협약을 체결하며 노사 리스크를 일부 해소했습니다."
-    },
-    {
-      title: "삼성전자, 업계 최초 12단 HBM4E 샘플 출하",
-      link: "https://search.naver.com/search.naver?where=news&query=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90%2C+%EC%97%85%EA%B3%84+%EC%B5%9C%EC%B4%88+12%EB%8B%A8+HBM4E+%EC%83%98%ED%94%8C+%EC%B6%9C%ED%95%98",
-      summary: "AI 메모리 시장 주도권을 확보하기 위해 삼성전자가 차세대 HBM 제품 샘플을 고객사에 공급했습니다."
-    },
-    {
-      title: "한화에어로스페이스, 유럽 국가들과 신규 무기 수출 계약 논의",
-      link: "https://search.naver.com/search.naver?where=news&query=%ED%95%9C%ED%99%94%EC%97%90%EC%96%B4%EB%A1%9C%EC%8A%A4%ED%8E%98%EC%9D%B4%EC%8A%A4%2C+%EC%9C%A0%EB%9F%BD+%EA%B5%AD%EA%B0%80%EB%93%A4%EA%B3%BC+%EC%8B%A0%EA%B7%9C+%EB%AC%B4%EA%B8%B0+%EC%88%98%EC%B6%9C+%EA%B3%84%EC%95%BD+%EB%85%BC%EC%9D%98",
-      summary: "K-방산의 경쟁력을 바탕으로 한화에어로스페이스가 유럽 주요국과 대규모 수출 협상을 진행 중입니다."
-    },
-    {
-      title: "한화, KASA와 무인기용 4,500파운드급 터보팬 엔진 공동 개발",
-      link: "https://search.naver.com/search.naver?where=news&query=%ED%95%9C%ED%99%94%2C+KASA%EC%99%80+%EB%AC%B4%EC%9D%B8%EA%B8%B0%EC%9A%A9+4%2C500%ED%8C%8C%EC%9A%B4%EB%93%9C%EA%B8%89+%ED%84%B0%EB%B3%B4%ED%8C%AC+%EC%97%94%EC%A7%84+%EA%B3%B5%EB%8F%99+%EA%B0%9C%EB%B0%9C",
-      summary: "첨단 항공 엔진 기술 국산화를 위해 한화가 정부 기관과 손잡고 핵심 기술 개발에 착수했습니다."
-    }
+    { title: "[임시] 코스피 외국인 순매도", link: "#", summary: "API 연동 전 임시 데이터입니다." },
+    { title: "[임시] 한국은행 금리 동결", link: "#", summary: "API 연동 전 임시 데이터입니다." }
   ]
 };
+
+// 설정을 로컬 스토리지에 저장하고 불러오는 함수
+window.saveAISettings = function() {
+  const seed = document.getElementById('settingSeedMoney').value;
+  const target = document.getElementById('settingTargetMoney').value;
+  const naverId = document.getElementById('settingNaverId').value;
+  const naverSecret = document.getElementById('settingNaverSecret').value;
+  const openaiKey = document.getElementById('settingOpenAiKey').value;
+
+  localStorage.setItem('ai_seed', seed);
+  localStorage.setItem('ai_target', target);
+  localStorage.setItem('ai_naver_id', naverId);
+  localStorage.setItem('ai_naver_secret', naverSecret);
+  localStorage.setItem('ai_openai_key', openaiKey);
+
+  showToast('AI 설정이 저장되었습니다. 페이지를 새로고침하면 반영됩니다.');
+}
+
+window.loadAISettings = function() {
+  document.getElementById('settingSeedMoney').value = localStorage.getItem('ai_seed') || '';
+  document.getElementById('settingTargetMoney').value = localStorage.getItem('ai_target') || '';
+  document.getElementById('settingNaverId').value = localStorage.getItem('ai_naver_id') || '';
+  document.getElementById('settingNaverSecret').value = localStorage.getItem('ai_naver_secret') || '';
+  document.getElementById('settingOpenAiKey').value = localStorage.getItem('ai_openai_key') || '';
+}
+
+// 네이버 뉴스 검색 (CORS 프록시 사용)
+async function fetchNaverNews(query, clientId, clientSecret) {
+  try {
+    const url = `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=5&sort=sim`;
+    // 주의: 브라우저 직접 호출은 CORS 에러가 발생하므로 allorigins 프록시 사용
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    
+    const response = await fetch(proxyUrl, {
+      headers: {
+        'X-Naver-Client-Id': clientId,
+        'X-Naver-Client-Secret': clientSecret
+      }
+    });
+    
+    if (!response.ok) return [];
+    
+    const proxyData = await response.json();
+    const data = JSON.parse(proxyData.contents);
+    
+    if (data.items) {
+      return data.items.map(item => ({
+        title: item.title.replace(/<[^>]+>/g, ''), // HTML 태그 제거
+        link: item.link,
+        summary: item.description.replace(/<[^>]+>/g, '')
+      }));
+    }
+    return [];
+  } catch (e) {
+    console.error("Naver API Error:", e);
+    return [];
+  }
+}
+
+// OpenAI API 요약 요청
+async function fetchOpenAISummary(openaiKey, realEstate, finance, seed, target) {
+  try {
+    const prompt = `
+너는 20년 차 경제 애널리스트야. 매일 아침 9시에 브리핑을 하는 상황이야.
+아래의 오늘자 뉴스 데이터(부동산, 금융)를 읽고, 아래 규칙에 따라 브리핑해줘.
+
+[뉴스 데이터]
+부동산: ${JSON.stringify(realEstate)}
+금융: ${JSON.stringify(finance)}
+
+[내 자산 현황]
+현재 시드머니: ${seed}원
+올해 목표 금액: ${target}원
+
+[작성 규칙]
+1. 오늘 시장의 핵심 3줄 요약 (초등학생도 이해할 수 있게 아주 쉽게)
+2. 기사에 나온 주요 경제 용어 2~3개를 골라서 괄호로 풀어서 설명
+3. 내 현재 시드머니와 목표 금액을 바탕으로, 오늘 하루 어떤 마음가짐으로 자산을 지키거나 투자해야 하는지 맞춤형 전략 제시 (현실적이고 구체적으로)
+
+출력 형식 (Markdown 금지, 일반 텍스트로 자연스럽게 작성):
+`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini", // 비용을 위해 mini 모델 사용
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7
+      })
+    });
+
+    const data = await response.json();
+    if (data.choices && data.choices.length > 0) {
+      return data.choices[0].message.content;
+    }
+    return "AI 분석을 불러오는 데 실패했습니다. 키 설정을 확인해주세요.";
+  } catch (e) {
+    console.error("OpenAI API Error:", e);
+    return "AI 서버와의 통신에 실패했습니다.";
+  }
+}
+
+// 메인 실행 함수
+window.generateAIBriefing = async function() {
+  const container = document.getElementById('dailyBriefingContent');
+  if(!container) return;
+
+  const naverId = localStorage.getItem('ai_naver_id');
+  const naverSecret = localStorage.getItem('ai_naver_secret');
+  const openaiKey = localStorage.getItem('ai_openai_key');
+  const seed = localStorage.getItem('ai_seed') || '0';
+  const target = localStorage.getItem('ai_target') || '0';
+
+  // API 키가 하나라도 없으면 Fallback 데이터 표시
+  if (!naverId || !naverSecret || !openaiKey) {
+    renderBriefing(FALLBACK_BRIEFING);
+    return;
+  }
+
+  container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">네이버 뉴스를 검색하고 20년 차 애널리스트 AI가 분석 중입니다... (약 10~15초 소요)</p>';
+
+  // 1. 뉴스 데이터 가져오기
+  const realEstateNews = await fetchNaverNews('부동산 시장 전망', naverId, naverSecret);
+  const financeNews = await fetchNaverNews('증시 코스피 환율 금리', naverId, naverSecret);
+
+  // 2. AI 요약 가져오기
+  const strategy = await fetchOpenAISummary(openaiKey, realEstateNews, financeNews, seed, target);
+
+  // 3. 화면 렌더링
+  renderBriefing({
+    exchangeRate: { value: "API 연동중", change: "-" }, // 한국은행 API는 CORS 우회 등 추가 설정이 필요하므로 보류
+    treasuryYield: { value: "API 연동중", change: "-" },
+    strategy: strategy,
+    realEstateNews: realEstateNews,
+    financeNews: financeNews
+  });
+}
+
+function renderBriefing(data) {
+  const container = document.getElementById('dailyBriefingContent');
+  if(!container) return;
+
+  let html = `
+    <div style="background: rgba(99, 102, 241, 0.1); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3); margin-bottom: 1.5rem;">
+      <h3 style="color: #a5b4fc; margin-bottom: 1rem; font-size: 1.1rem;">👨‍💼 20년 차 애널리스트의 맞춤형 브리핑</h3>
+      <p style="font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; color: #fff;">${data.strategy}</p>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h4 style="color: var(--text-secondary); margin-bottom: 0.8rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.5rem;">🏢 오늘의 부동산 뉴스 Top 5</h4>
+        <ul style="list-style: none; padding: 0;">
+          ${data.realEstateNews.map(news => `
+            <li style="margin-bottom: 0.8rem;">
+              <a href="${news.link}" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;">${news.title}</a>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">${news.summary.substring(0, 50)}...</p>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: var(--text-secondary); margin-bottom: 0.8rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.5rem;">💰 오늘의 금융/증시 뉴스 Top 5</h4>
+        <ul style="list-style: none; padding: 0;">
+          ${data.financeNews.map(news => `
+            <li style="margin-bottom: 0.8rem;">
+              <a href="${news.link}" target="_blank" style="color: var(--success-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;">${news.title}</a>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">${news.summary.substring(0, 50)}...</p>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+// 초기화
+document.addEventListener('DOMContentLoaded', () => {
+  // 모달을 열 때 셋팅값 로드하도록 추가
+  const originalOpenSettings = window.openSettingsModal;
+  window.openSettingsModal = function() {
+    if(originalOpenSettings) originalOpenSettings();
+    loadAISettings();
+  };
+
+  // 뉴스 탭을 누르거나 초기 로딩 시 브리핑 생성
+  setTimeout(() => {
+    generateAIBriefing();
+  }, 1000);
+});
