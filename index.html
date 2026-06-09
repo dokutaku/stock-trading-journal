@@ -12,24 +12,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
      :root {
-        --bg-color: #262523;
-        --panel-bg: rgba(198, 156, 58, 0.08);
-        --panel-border: rgba(198, 156, 58, 0.4);
-        --text-primary: #F5F5DC;
-        --text-secondary: #C69C3A;
-        --accent-color: #E11A2B;
-        --accent-hover: #B51522;
+        --bg-color: #0f1115;
+        --panel-bg: rgba(25, 28, 35, 0.7);
+        --panel-border: rgba(255, 255, 255, 0.08);
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --accent-color: #6366f1;
+        --accent-hover: #4f46e5;
         --success-color: #10b981;
-        --danger-color: #E11A2B;
-        --input-bg: rgba(0, 0, 0, 0.3);
+        --danger-color: #ef4444;
+        --input-bg: rgba(15, 17, 21, 0.6);
      }
      :root.light-theme {
-        --bg-color: #262523;
-        --panel-bg: rgba(198, 156, 58, 0.08);
-        --panel-border: rgba(198, 156, 58, 0.4);
-        --text-primary: #F5F5DC;
-        --text-secondary: #C69C3A;
-        --input-bg: rgba(0, 0, 0, 0.3);
+        --bg-color: #f8fafc;
+        --panel-bg: rgba(255, 255, 255, 0.9);
+        --panel-border: rgba(0, 0, 0, 0.1);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --input-bg: rgba(255, 255, 255, 0.6);
      }
      * { box-sizing: border-box; margin: 0; padding: 0; }
      body {
@@ -37,6 +37,9 @@
         background: var(--bg-color);
         color: var(--text-primary);
         min-height: 100vh;
+        background-image: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+                          radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05), transparent 25%);
+        background-attachment: fixed;
      }
      h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; }
      
