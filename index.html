@@ -23,6 +23,14 @@
         --danger-color: #ef4444;
         --input-bg: rgba(15, 17, 21, 0.6);
      }
+     :root.light-theme {
+        --bg-color: #f8fafc;
+        --panel-bg: rgba(255, 255, 255, 0.9);
+        --panel-border: rgba(0, 0, 0, 0.1);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --input-bg: rgba(255, 255, 255, 0.6);
+     }
      * { box-sizing: border-box; margin: 0; padding: 0; }
      body {
         font-family: 'Inter', sans-serif;
@@ -399,9 +407,53 @@
       <button class="nav-btn" onclick="switchMainTab('journal')" id="nav-journal">매매일지</button>
       <button class="nav-btn" onclick="switchMainTab('calculator')" id="nav-calculator">고정손실 계산기</button>
       <button class="nav-btn" onclick="switchMainTab('site')" id="nav-site">관련사이트</button>
-      <button class="nav-btn" onclick="handleSignOut()" style="color: var(--danger-color); margin-left: auto;">로그아웃</button>
+      <button class="nav-btn" onclick="openSettingsModal()" style="margin-left: auto; font-size: 1.2rem;" title="설정">⚙️</button>
     </div>
   </nav>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal" onclick="if(event.target===this) closeSettingsModal()">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 style="color: var(--text-primary);">⚙️ 설정</h3>
+        <button class="close-btn" onclick="closeSettingsModal()">×</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 15px;">
+        <!-- 1. 계정 정보 -->
+        <div style="background: rgba(128,128,128,0.1); padding: 1rem; border-radius: 8px;">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">현재 로그인 계정</p>
+          <p id="settingsUserEmail" style="font-weight: 600; color: var(--text-primary);">-</p>
+        </div>
+        
+        <!-- 3. 데이터 내보내기 -->
+        <button class="btn" onclick="exportData()" style="text-align: left; display: flex; align-items: center; gap: 10px;">
+          <span>💾</span> 데이터 백업 (JSON 다운로드)
+        </button>
+
+        <!-- 5. 테마 전환 -->
+        <button class="btn" onclick="toggleTheme()" style="text-align: left; display: flex; align-items: center; gap: 10px;">
+          <span>🌓</span> 다크 / 라이트 모드 전환
+        </button>
+
+        <div style="height: 1px; background: var(--panel-border); margin: 5px 0;"></div>
+
+        <!-- 4. 데이터 초기화 -->
+        <button class="btn" onclick="clearAllData()" style="text-align: left; display: flex; align-items: center; gap: 10px; color: #fbbf24;">
+          <span>⚠️</span> 작성한 모든 데이터 비우기
+        </button>
+
+        <!-- 로그아웃 -->
+        <button class="btn" onclick="handleSignOut()" style="text-align: left; display: flex; align-items: center; gap: 10px;">
+          <span>🚪</span> 로그아웃
+        </button>
+
+        <!-- 6. 회원 탈퇴 -->
+        <button class="btn" onclick="deleteAccount()" style="text-align: left; display: flex; align-items: center; gap: 10px; color: var(--danger-color); border: 1px solid var(--danger-color); margin-top: 10px;">
+          <span>🗑️</span> 회원 탈퇴
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- 1. 오늘 뉴스 탭 -->
   <div id="main-news" class="main-content active">
@@ -1282,6 +1334,79 @@
       await supabaseClient.auth.signOut();
       localStorage.removeItem('tradingJournalData');
       location.reload();
+    }
+
+    async function deleteAccount() {
+      if (!confirm("⚠️ 경고: 정말로 탈퇴하시겠습니까?\n모든 일지 데이터와 계정이 영구적으로 삭제되며 복구할 수 없습니다!")) return;
+      
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) return;
+
+      try {
+        // 1. Delete user's app_data
+        await supabaseClient.from('app_data').delete().eq('id', session.user.id);
+        
+        // 2. Delete auth user via RPC
+        const { error } = await supabaseClient.rpc('delete_user');
+        if (error) {
+          alert("회원 탈퇴 처리 중 오류가 발생했습니다: " + error.message + "\n(Supabase SQL 설정이 안 되어 있을 수 있습니다.)");
+          return;
+        }
+
+        // 3. Sign out & clean up
+        await handleSignOut();
+      } catch (err) {
+        alert("탈퇴 오류: " + err.message);
+      }
+    }
+
+    // --- Settings Modal Functions ---
+    async function openSettingsModal() {
+      document.getElementById('settingsModal').classList.add('show');
+      const emailEl = document.getElementById('settingsUserEmail');
+      if (supabaseClient) {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        emailEl.innerText = session?.user?.email || '알 수 없음';
+      }
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('show');
+    }
+
+    function exportData() {
+      const dataStr = localStorage.getItem('tradingJournalData');
+      if (!dataStr) return alert("내보낼 데이터가 없습니다.");
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `StockJournal_Backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAllData() {
+      if (!confirm("작성하신 모든 일지, 뉴스, 계산기 기록 등을 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) return;
+      const defaultData = { dailyLogs: [], trades: [], news: [], periodLogs: [], sites: [], sitesSeeded: true };
+      localStorage.setItem('tradingJournalData', JSON.stringify(defaultData));
+      pushToSupabase(defaultData);
+      renderAll();
+      closeSettingsModal();
+      alert("모든 데이터가 초기화되었습니다.");
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      if (root.classList.contains('light-theme')) {
+        root.classList.remove('light-theme');
+        localStorage.setItem('journalTheme', 'dark');
+      } else {
+        root.classList.add('light-theme');
+        localStorage.setItem('journalTheme', 'light');
+      }
     }
 
     async function handlePasswordReset() {
@@ -3284,6 +3409,11 @@
 
     // Start App
     document.addEventListener('DOMContentLoaded', async () => {
+      // Restore Theme
+      if (localStorage.getItem('journalTheme') === 'light') {
+        document.documentElement.classList.add('light-theme');
+      }
+
       document.getElementById('year-target-year').value = new Date().getFullYear();
       document.getElementById('quarterYear').value = new Date().getFullYear();
       document.getElementById('quarterQ').value = Math.ceil((new Date().getMonth()+1)/3);
