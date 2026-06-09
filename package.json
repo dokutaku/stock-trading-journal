@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "serve -l 3000",
-    "stagewise": "concurrently \"serve -l 3000\" \"stagewise --app-port 3000\""
+    "stagewise": "concurrently \"serve -l 3000\" \"stagewise --app-port 3000 -s -b\""
   },
   "keywords": [],
   "author": "",
