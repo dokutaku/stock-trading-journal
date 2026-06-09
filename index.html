@@ -1173,6 +1173,20 @@
     /* --- Auth Logic --- */
     async function checkAuthSession() {
       if (!supabaseClient) return;
+
+      // Check for OAuth errors in URL
+      const hashText = window.location.hash.substring(1);
+      if (hashText.includes('error_description=')) {
+        const hashParams = new URLSearchParams(hashText);
+        const errorDesc = hashParams.get('error_description');
+        if (errorDesc) {
+          const msg = document.getElementById('authMessage');
+          msg.innerText = "소셜 로그인 에러: " + decodeURIComponent(errorDesc.replace(/\+/g, ' '));
+          msg.style.display = 'block';
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+
       const { data: { session } } = await supabaseClient.auth.getSession();
       handleAuthStateChange(session);
       
@@ -1230,10 +1244,11 @@
 
     async function signInWithOAuth(provider) {
       const msg = document.getElementById('authMessage');
+      const cleanUrl = window.location.origin + window.location.pathname;
       const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: window.location.href
+          redirectTo: cleanUrl
         }
       });
       if (error) {
