@@ -373,44 +373,9 @@
      @media (max-width: 768px) {
        .modal { align-items: flex-end; }
        .modal-content { width: 100%; max-width: 100%; max-height: 85vh; border-radius: 24px 24px 0 0; margin: 0; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); border-bottom: none; }
-       .nav-tabs-container { display: none !important; }
-       .top-nav { padding: 0 1rem; }
-       .bottom-nav { display: flex; }
-       body { padding-bottom: 70px; } /* Space for bottom nav */
-       .fab-btn { bottom: 80px; } /* Move FAB above bottom nav */
+       .top-nav { padding: 0 0.5rem; }
      }
 
-     /* Bottom Navigation for Mobile */
-     .bottom-nav {
-        display: none;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--panel-bg);
-        border-top: 1px solid var(--panel-border);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        z-index: 99;
-        padding-bottom: env(safe-area-inset-bottom);
-     }
-     .bottom-nav-btn {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        color: var(--text-secondary);
-        padding: 0.8rem 0;
-        cursor: pointer;
-        transition: all 0.2s;
-     }
-     .bottom-nav-btn .icon { font-size: 1.3rem; margin-bottom: 3px; }
-     .bottom-nav-btn .label { font-size: 0.7rem; font-weight: 500; }
-     .bottom-nav-btn.active { color: var(--accent-color); }
-     .bottom-nav-btn.active .icon { transform: scale(1.1); }
   </style>
 </head>
 <body>
@@ -3499,26 +3464,6 @@
     });
   </script>
   </div>
-
-  <!-- Mobile Bottom Navigation -->
-  <nav class="bottom-nav">
-    <button class="bottom-nav-btn active" onclick="switchMainTab('news')" id="bottom-nav-news">
-      <span class="icon">📰</span>
-      <span class="label">뉴스·일정</span>
-    </button>
-    <button class="bottom-nav-btn" onclick="switchMainTab('journal')" id="bottom-nav-journal">
-      <span class="icon">📔</span>
-      <span class="label">매매일지</span>
-    </button>
-    <button class="bottom-nav-btn" onclick="switchMainTab('calculator')" id="bottom-nav-calculator">
-      <span class="icon">🧮</span>
-      <span class="label">계산기</span>
-    </button>
-    <button class="bottom-nav-btn" onclick="switchMainTab('site')" id="bottom-nav-site">
-      <span class="icon">🔗</span>
-      <span class="label">관련사이트</span>
-    </button>
-  </nav>
 
 </body>
 </html>
