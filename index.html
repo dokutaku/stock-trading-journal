@@ -2171,72 +2171,7 @@
     }
 
     function autoAnalyzeMonth(btn) {
-      const yy = document.getElementById('month-target-year').value;
-      const mm = document.getElementById('month-target-month').value;
-      if (!yy || !mm) return alert('분석할 연도와 월을 선택해주세요.');
-
-      const prefix = `${yy}-${mm}`;
-      const data = getStorageData();
-      
-      const monthlyTrades = data.trades.filter(t => t.date.startsWith(prefix));
-      const monthlyWeeks = data.periodLogs.filter(p => p.periodType === 'week' && p.date.startsWith(prefix));
-      
-      const originalText = btn.innerText;
-      btn.innerText = '데이터 분석 중...';
-      btn.disabled = true;
-
-      setTimeout(() => {
-        const markets = [
-          "- 금리 인하 기대감으로 증시 전반적 반등세 지속\n- 외국인과 기관의 쌍끌이 순매수 유입 확인\n- 코스피 주요 저항선 돌파 후 새로운 상승 추세 형성 모색 중",
-          "- 인플레이션 지표 둔화 지연에 따른 금리 부담 상존\n- 외국인 자금 일부 이탈 및 기관 관망세\n- 단순 기술적 반등 후 재차 박스권 장세 진입",
-          "- 뚜렷한 상승 모멘텀 부재 속 유동성 축소\n- 외국인 선물 매도와 기관 현물 매도의 핑퐁 장세\n- 전반적 하락 추세 속 짧은 반등에 그침"
-        ];
-        const sectors = [
-          "- 반도체 및 AI, 전력 설비 관련주 강세 뚜렷\n- 2차전지 등 기존 주도주 기간 조정 국면 지속\n- 밸류업 프로그램 관련 저PBR (금융, 지주 등) 가치주 자금 순환",
-          "- 방산, 조선, 기계 등 수출 호조 수주 산업 릴레이 강세\n- 바이오, 헬스케어 단기 모멘텀 부각되며 단기 급등\n- 성장주 중심의 수급 쏠림 현상 심화",
-          "- 금리 부담에 따른 배당주, 통신주 위주 방어적 흐름\n- 실적 발표에 따른 종목별 극심한 차별화 장세\n- 뚜렷한 주도 섹터 없이 빠른 순환매 장세"
-        ];
-        
-        let buyCount = 0, sellCount = 0;
-        let popularStock = {};
-        monthlyTrades.forEach(t => {
-          if (t.type === 'buy') buyCount++;
-          else sellCount++;
-          popularStock[t.stockName] = (popularStock[t.stockName] || 0) + 1;
-        });
-
-        const sortedStocks = Object.keys(popularStock).sort((a,b) => popularStock[b] - popularStock[a]);
-        const mainStock = sortedStocks.length > 0 ? sortedStocks[0] : '없음';
-        
-        let reviewStr = `- 한 달 동안 총 ${monthlyTrades.length}회의 매매 발생 (매수 ${buyCount}회, 매도 ${sellCount}회)\n`;
-        reviewStr += `- 주요 거래 종목: ${mainStock}\n`;
-        
-        if (monthlyTrades.length === 0) {
-          reviewStr += `- 한 달 간 매매 없이 관망세를 유지했습니다. 인내심을 갖고 원칙을 지켰다면 긍정적입니다.\n`;
-        } else if (buyCount > sellCount * 2) {
-          reviewStr += `- 하락장 혹은 조정장에서 분할 매수 원칙을 적극적으로 시도한 것으로 보입니다. (비중 조절 주의)\n`;
-        } else if (sellCount > buyCount * 2) {
-          reviewStr += `- 차익 실현 혹은 손절매 위주의 보수적인 현금 확보 전략을 취했습니다.\n`;
-        } else {
-          reviewStr += `- 매수와 매도 비중이 균형을 이루며 시장 흐름에 유연하게 대처했습니다.\n`;
-        }
-
-        if (monthlyWeeks.length > 0) {
-          const lastWeek = monthlyWeeks[monthlyWeeks.length-1].review || monthlyWeeks[monthlyWeeks.length-1].market || '';
-          const snippet = lastWeek.replace(/\n/g, ' ').substring(0, 40);
-          if (snippet) reviewStr += `- 최근 주간 복기 요약: ${snippet}...\n`;
-        } else {
-          reviewStr += `- 이번 달 주간 기록이 부족합니다. 주간 복기를 꾸준히 남기면 원칙 준수 여부 파악에 도움이 됩니다.\n`;
-        }
-
-        const form = document.querySelector('#journal-month form');
-        form.querySelector('.period-market').value = markets[Math.floor(Math.random()*markets.length)];
-        form.querySelector('.period-sector').value = sectors[Math.floor(Math.random()*sectors.length)];
-        form.querySelector('.period-review').value = reviewStr;
-
-        btn.innerText = originalText;
-        btn.disabled = false;
-      }, 1200);
+      alert('월간 자동 분석 기능은 현재 준비 중입니다! (기대해주세요)');
     }
 
     function getWeekOfMonthStr(dateStr) {
@@ -2310,23 +2245,7 @@
     }
 
     function autoAnalyzeStock() {
-      const stockName = document.getElementById('quarterStock').value.trim();
-      if (!stockName) {
-        alert('종목명을 먼저 입력해주세요.');
-        return;
-      }
-      
-      const revInput = document.querySelector('.q-revenue');
-      const opInput = document.querySelector('.q-op-profit');
-      const fcfInput = document.querySelector('.q-fcf');
-      const roeInput = document.querySelector('.q-roe');
-
-      if (!revInput.value) revInput.value = `- 전년 대비 매출 증가/감소 여부:\n- 주된 이유 (예: 판매 단가 상승, 판매량 증가 등):`;
-      if (!opInput.value) opInput.value = `- 영업이익 증감 여부:\n- 감소 시 원인 (원자재 가격 상승, 판관비 상승 등):\n- 증가 시 원인:`;
-      if (!fcfInput.value) fcfInput.value = `- 이익이 났음에도 투자나 재고 증가로 현금이 묶였는가?:\n- 현금이 묶여있다면 그 이유는?:\n- 현금흐름이 좋은 편인가?:`;
-      if (!roeInput.value) roeInput.value = `- ROE가 오르고 있는가 떨어지고 있는가? (오르면 자본을 잘 쓰고 있다는 의미):`;
-      
-      fetchTargetPrices();
+      alert('분기 기업 실적 자동 분석 기능은 현재 준비 중입니다! (기대해주세요)');
     }
 
     function savePeriodLog(e, periodType) {
