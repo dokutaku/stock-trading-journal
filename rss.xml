@@ -2,13 +2,13 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>주식 매매 일지 | Open Design</title>
-  <link>https://dokutaku.github.io/stock-trading-journal/</link>
-  <atom:link href="https://dokutaku.github.io/stock-trading-journal/rss.xml" rel="self" type="application/rss+xml" />
+  <link>https://stock-trading-journal-94q.pages.dev/</link>
+  <atom:link href="https://stock-trading-journal-94q.pages.dev/rss.xml" rel="self" type="application/rss+xml" />
   <description>개인 주식 매매 일지 및 관리 대시보드</description>
   <language>ko-kr</language>
   <item>
     <title>주식 매매 일지 서비스 시작</title>
-    <link>https://dokutaku.github.io/stock-trading-journal/</link>
+    <link>https://stock-trading-journal-94q.pages.dev/</link>
     <description>성공적인 투자를 위한 개인 맞춤형 주식 매매 일지 서비스입니다.</description>
     <pubDate>Wed, 10 Jun 2026 00:00:00 +0900</pubDate>
   </item>
