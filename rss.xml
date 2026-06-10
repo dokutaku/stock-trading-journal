@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+  <title>주식 매매 일지 | Open Design</title>
+  <link>https://dokutaku.github.io/stock-trading-journal/</link>
+  <description>개인 주식 매매 일지 및 관리 대시보드</description>
+  <language>ko-kr</language>
+  <item>
+    <title>주식 매매 일지 서비스 시작</title>
+    <link>https://dokutaku.github.io/stock-trading-journal/</link>
+    <description>성공적인 투자를 위한 개인 맞춤형 주식 매매 일지 서비스입니다.</description>
+    <pubDate>Wed, 10 Jun 2026 00:00:00 +0900</pubDate>
+  </item>
+</channel>
+</rss>
