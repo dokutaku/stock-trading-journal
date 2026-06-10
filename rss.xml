@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>주식 매매 일지 | Open Design</title>
   <link>https://dokutaku.github.io/stock-trading-journal/</link>
+  <atom:link href="https://dokutaku.github.io/stock-trading-journal/rss.xml" rel="self" type="application/rss+xml" />
   <description>개인 주식 매매 일지 및 관리 대시보드</description>
   <language>ko-kr</language>
   <item>
