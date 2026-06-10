@@ -1185,23 +1185,23 @@
     let currentFilter = 'all';
 
     const DEFAULT_SITES = [
-      { category: "거장 포트폴리오", title: "Dataroma", url: "https://www.dataroma.com", desc: "미국 월스트릿 거장들의 포폴", market: ["US"] },
-      { category: "거장 포트폴리오", title: "hedgefollow", url: "https://hedgefollow.com", desc: "유명 헤지펀드와 투자 대가의 포폴 추적", market: ["US"] },
-      { category: "거장 포트폴리오", title: "WhaleWisdom", url: "https://whalewisdom.com", desc: "미국 거장들의 포트폴리오 추적", market: ["US"] },
-      { category: "거장 포트폴리오", title: "Whale Insight Pro", url: "https://whale-insight.com/", desc: "국내 포폴(국민연금, 버핏 지분 변동 분석, 실시간이 아닌 공시기반)", market: ["KR", "US"] },
-      { category: "거장 포트폴리오", title: "ETF.com", url: "https://www.etf.com", desc: "우량 ETF들의 보유 비중", market: ["US", "KR"] },
+      { id: "seed-dataroma", category: "거장 포트폴리오", title: "Dataroma", url: "https://www.dataroma.com", desc: "미국 월스트릿 거장들의 포폴", market: ["US"] },
+      { id: "seed-hedgefollow", category: "거장 포트폴리오", title: "hedgefollow", url: "https://hedgefollow.com", desc: "유명 헤지펀드와 투자 대가의 포폴 추적", market: ["US"] },
+      { id: "seed-whalewisdom", category: "거장 포트폴리오", title: "WhaleWisdom", url: "https://whalewisdom.com", desc: "미국 거장들의 포트폴리오 추적", market: ["US"] },
+      { id: "seed-whaleinsight", category: "거장 포트폴리오", title: "Whale Insight Pro", url: "https://whale-insight.com/", desc: "국내 포폴(국민연금, 버핏 지분 변동 분석, 실시간이 아닌 공시기반)", market: ["KR", "US"] },
+      { id: "seed-etfcom", category: "거장 포트폴리오", title: "ETF.com", url: "https://www.etf.com", desc: "우량 ETF들의 보유 비중", market: ["US", "KR"] },
 
-      { category: "기업 분석", title: "트레이딩 뷰", url: "https://kr.tradingview.com", desc: "차트 분석 도구", market: ["US", "KR"] },
-      { category: "기업 분석", title: "스탁이지", url: "https://stockeasy.kr", desc: "국내 주식 맞춤 리서치", market: ["KR"] },
-      { category: "기업 분석", title: "Finviz", url: "https://finviz.com", desc: "미국 주식 종목 스크리닝", market: ["US"] },
-      { category: "기업 분석", title: "SEC.gov", url: "https://www.sec.gov", desc: "미국 증권거래위원회", market: ["US"] },
-      { category: "기업 분석", title: "핀텔", url: "https://fintel.io", desc: "기관 투자자 보유 현황", market: ["US", "KR"] },
-      { category: "기업 분석", title: "DART", url: "https://dart.fss.or.kr", desc: "회사 공시 사업보고서 및 중요 투자자 반응", market: ["KR"] },
-      { category: "기업 분석", title: "한국거래소 정보데이터시스템", url: "http://data.krx.co.kr", desc: "국내 증시와 관련된 다양한 통계 정보", market: ["KR"] },
-      { category: "기업 분석", title: "네이버증권", url: "https://finance.naver.com", desc: "회사 기본정보 혹은 해당기업 투자자 반응", market: ["KR", "US"] },
-      { category: "기업 분석", title: "thinkpool", url: "https://www.thinkpool.com", desc: "주요 섹터 및 신규기업 리포트", market: ["KR"] },
-      { category: "기업 분석", title: "macrotrends", url: "https://www.macrotrends.net", desc: "10년치 이상의 매출과 이익, P/E추이 등을 차트로 볼 수 있다.", market: ["US"] },
-      { category: "기업 분석", title: "tipranks", url: "https://www.tipranks.com", desc: "내부자 거래 추적", market: ["US"] },
+      { id: "seed-tradingview", category: "기업 분석", title: "트레이딩 뷰", url: "https://kr.tradingview.com", desc: "차트 분석 도구", market: ["US", "KR"] },
+      { id: "seed-stockeasy", category: "기업 분석", title: "스탁이지", url: "https://stockeasy.kr", desc: "국내 주식 맞춤 리서치", market: ["KR"] },
+      { id: "seed-finviz", category: "기업 분석", title: "Finviz", url: "https://finviz.com", desc: "미국 주식 종목 스크리닝", market: ["US"] },
+      { id: "seed-secgov", category: "기업 분석", title: "SEC.gov", url: "https://www.sec.gov", desc: "미국 증권거래위원회", market: ["US"] },
+      { id: "seed-fintel", category: "기업 분석", title: "핀텔", url: "https://fintel.io", desc: "기관 투자자 보유 현황", market: ["US", "KR"] },
+      { id: "seed-dart", category: "기업 분석", title: "DART", url: "https://dart.fss.or.kr", desc: "회사 공시 사업보고서 및 중요 투자자 반응", market: ["KR"] },
+      { id: "seed-krx", category: "기업 분석", title: "한국거래소 정보데이터시스템", url: "http://data.krx.co.kr", desc: "국내 증시와 관련된 다양한 통계 정보", market: ["KR"] },
+      { id: "seed-naver", category: "기업 분석", title: "네이버증권", url: "https://finance.naver.com", desc: "회사 기본정보 혹은 해당기업 투자자 반응", market: ["KR", "US"] },
+      { id: "seed-thinkpool", category: "기업 분석", title: "thinkpool", url: "https://www.thinkpool.com", desc: "주요 섹터 및 신규기업 리포트", market: ["KR"] },
+      { id: "seed-macrotrends", category: "기업 분석", title: "macrotrends", url: "https://www.macrotrends.net", desc: "10년치 이상의 매출과 이익, P/E추이 등을 차트로 볼 수 있다.", market: ["US"] },
+      { id: "seed-tipranks", category: "기업 분석", title: "tipranks", url: "https://www.tipranks.com", desc: "내부자 거래 추적", market: ["US"] },
 
       { category: "경제흐름", title: "Trading Economics", url: "https://tradingeconomics.com", desc: "전 세계 금리, 물가상승률, 원자재 가격 추이", market: ["US", "KR"] },
       { category: "경제흐름", title: "daily_byte", url: "https://www.mydailybyte.com/", desc: "비즈니스 및 경제 흐름", market: ["KR", "US"] },
@@ -1258,7 +1258,11 @@
           console.warn('Supabase fetch issue:', error.message);
           return null;
         }
-        return data.json_data;
+        let remoteData = data.json_data;
+        if (typeof remoteData === 'string') {
+           try { remoteData = JSON.parse(remoteData); } catch(e){}
+        }
+        return remoteData;
       } catch (err) {
         return null;
       }
@@ -1487,7 +1491,10 @@
       const data = localStorage.getItem('tradingJournalData');
       if (data) {
          try {
-           const parsed = JSON.parse(data);
+           let parsed = JSON.parse(data);
+           if (typeof parsed === 'string') {
+               parsed = JSON.parse(parsed);
+           }
            if(!parsed.dailyLogs) parsed.dailyLogs = [];
            if(!parsed.trades) parsed.trades = [];
            if(!parsed.news) parsed.news = [];
